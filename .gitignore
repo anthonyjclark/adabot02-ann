@@ -60,3 +60,4 @@ Temporary Items
 *.out
 *.app
 
+bin/

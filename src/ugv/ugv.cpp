@@ -1,9 +1,10 @@
 
-#include "../revisit-logger/cpp/logger.hpp"
+#include "../../logger/cpp/logger.hpp"
 
 #include <dart/dart.hpp>
 using namespace dart::dynamics;
 using namespace dart::simulation;
+using namespace dart::math::suffixes;
 using namespace Eigen;
 
 #include <dart/collision/bullet/bullet.hpp>
@@ -77,8 +78,8 @@ auto add_chassis(SkeletonPtr skel, const string & name, const Vector3d & dims,
     body_prop.mInertia.setMoment(shape->computeInertia(mass));
 
     // Create the joint-node pair
-    auto body_joint_pair = skel->createJointAndBodyNodePair<FreeJoint>(
-        nullptr, joint_prop, body_prop);
+    auto body_joint_pair = skel->createJointAndBodyNodePair<FreeJoint>(nullptr,
+        joint_prop, body_prop);
 
     // Set the shape of the body
     body_joint_pair.second->createShapeNodeWith<CollisionAspect, DynamicsAspect>(shape);
@@ -125,57 +126,97 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
     ShapePtr weg_shape{new SphereShape{wp.weg_radius}};
     const double weg_mass = wp.density * weg_shape->getVolume();
     PrismaticJoint::Properties weg_joint_prop;
-    weg_joint_prop.mName = wp.name + "_weg_joint";
-    Isometry3d tf_weg{Isometry3d::Identity()};
-    tf_weg.translation() = Vector3d(0, wp.dimensions.y() / 1.9, 0);
-    weg_joint_prop.mT_ParentBodyToJoint = tf_weg;
     BodyNode::Properties weg_body_prop;
-    weg_body_prop.mName = wp.name + "_weg";
     weg_body_prop.mRestitutionCoeff = wp.restitution;
     weg_body_prop.mInertia.setMass(weg_mass);
     weg_body_prop.mInertia.setMoment(weg_shape->computeInertia(weg_mass));
-    auto weg_pair = skel->createJointAndBodyNodePair<PrismaticJoint>(body_joint_pair.second, weg_joint_prop, weg_body_prop);
-    weg_pair.second->createShapeNodeWith<CollisionAspect, DynamicsAspect>(weg_shape);
-    weg_pair.first->setActuatorType(Joint::VELOCITY);
-    weg_pair.first->setAxis(Vector3d{0, 1, 0});
+
+    for (size_t weg_idx = 0; weg_idx < wp.num_wegs; ++weg_idx) {
+
+        weg_body_prop.mName = wp.name + "_weg" + std::to_string(weg_idx);
+        weg_joint_prop.mName = wp.name + "_weg_joint" + std::to_string(weg_idx);
+
+        // Move the weg into place
+        Isometry3d tf_weg{Isometry3d::Identity()};
+        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 1.9, 0);
+        auto vector_transform = AngleAxisd(2_pi * weg_idx / wp.num_wegs, Vector3d(0, 0, 1));
+        tf_weg.translation() = vector_transform * vector_to_point;
+
+        weg_joint_prop.mT_ParentBodyToJoint = tf_weg;
+
+        auto weg_pair = skel->createJointAndBodyNodePair<PrismaticJoint>(body_joint_pair.second,
+            weg_joint_prop, weg_body_prop);
+        weg_pair.second->createShapeNodeWith<CollisionAspect, DynamicsAspect>(weg_shape);
+        weg_pair.first->setActuatorType(Joint::VELOCITY);
+
+        // weg_pair.first->setAxis(Vector3d{0, 1, 0});
+        weg_pair.first->setAxis(vector_transform * vector_to_point);
+    }
 
 
     return body_joint_pair;
 }
 
 
-auto add_obstacle()
+auto create_random_box(double ugv_density)
 {
-    auto skel = Skeleton::create();
+    static std::random_device r;
+    static std::default_random_engine reng(r());
 
-    // auto dims = dart::math::randomVector<3>(8_cm, 15_cm);
-    Vector3d dims(10_cm, 6_cm, 40_cm);
+    // Randomize the size of objects
+    static std::uniform_real_distribution<double> uni_real_xz_size(5_cm, 20_cm);
+    static std::uniform_real_distribution<double> uni_real_y_size(2_cm, 5_cm);
+
+    // Density factor
+    static std::uniform_real_distribution<double> uni_real_density(0.5, 1.5);
+
+    // Make sure that obstacles don't fall on the robot
+    static const std::array<double, 4> intervals{{-100_cm, -24_cm, 24_cm, 100_cm}};
+    static const std::array<double, 3> weights{{1, 0, 1}};
+    static std::piecewise_constant_distribution<double> uni_real_xz_trans(
+        intervals.begin(), intervals.end(), weights.begin());
+
+    static size_t object_count = 0;
+
+    std::string name = "obstacle" + std::to_string(object_count++);
+
+    auto skel = Skeleton::create(name);
+
+    Vector3d dims, trans;
+
+    dims.x() = uni_real_xz_size(reng);
+    dims.y() = uni_real_y_size(reng);
+    dims.z() = uni_real_xz_size(reng);
+
+    trans.x() = uni_real_xz_trans(reng);
+    trans.y() = 10_cm;
+    trans.z() = uni_real_xz_trans(reng);
 
     ShapePtr shape{new BoxShape(dims)};
-    const double mass = dart::math::random(0.5, 1.5) * 1000 * shape->getVolume();
+    const double mass = uni_real_density(reng) * ugv_density * shape->getVolume();
 
     // Setup the joint properties
-    WeldJoint::Properties joint_prop;
+    FreeJoint::Properties joint_prop;
 
     Isometry3d tf(Isometry3d::Identity());
-    tf.translation() = Vector3d(0.5, 0, 0);
+    tf.translation() = trans;
     joint_prop.mT_ParentBodyToJoint = tf;
 
     // Setup the body properties
     BodyNode::Properties body_prop;
-    body_prop.mName = "obstacle1";
+    body_prop.mName = name;
     body_prop.mRestitutionCoeff = 0.8;
     body_prop.mInertia.setMass(mass);
     body_prop.mInertia.setMoment(shape->computeInertia(mass));
 
     // Create the joint-node pair
-    auto body_joint_pair = skel->createJointAndBodyNodePair<WeldJoint>(
+    auto body_joint_pair = skel->createJointAndBodyNodePair<FreeJoint>(
         nullptr, joint_prop, body_prop);
 
     // Set the shape of the body
     body_joint_pair.second->createShapeNodeWith<CollisionAspect, DynamicsAspect>(shape);
 
-    return std::make_pair(skel, dims);
+    return std::make_tuple(skel, dims, name);
 }
 
 
@@ -206,7 +247,7 @@ int main()
     // General parameters
     constexpr double material_density = 700_kg_per_m3;
     constexpr double material_restitution = 0.75;
-    constexpr double vertical_offset = 20_cm;
+    constexpr double vertical_offset = 5_cm;
 
     // Chassis parameters
     constexpr double wheel_base = 10_cm;
@@ -222,6 +263,21 @@ int main()
 
     // Weg parameters
     constexpr double weg_radius = 0.25_cm;
+    constexpr long weg_count = 3;
+
+    // Simulation parameters
+    constexpr double TIME_STOP = 30;
+    constexpr double TIME_STEP = 0.005;
+    constexpr double VIS_STEP = 1.0 / 10.0;
+    constexpr double VIS_SCALE = 10;
+
+
+    //
+    // Create the visualization logger
+    //
+
+    revisit::logger rl(VIS_STEP, TIME_STOP);
+
 
     //
     // Create the UGV skeleton
@@ -236,8 +292,13 @@ int main()
 
     FreeJoint* chassis_joint;
     BodyNode* chassis_body;
-    std::tie(chassis_joint, chassis_body) = add_chassis(
-        ugv, chassis_name, chassis_dimensions, material_density, material_restitution);
+    std::tie(chassis_joint, chassis_body) = add_chassis(ugv, chassis_name,
+        chassis_dimensions, material_density, material_restitution);
+
+    rl.add_box(chassis_name,
+        chassis_dimensions.x() * VIS_SCALE,
+        chassis_dimensions.y() * VIS_SCALE,
+        chassis_dimensions.z() * VIS_SCALE);
 
 
     //
@@ -253,12 +314,13 @@ int main()
         chassis_body,
         "",
         weg_radius,
-        1
+        weg_count
     };
 
     vector<string> wheel_names{
         "front-right-wheel", "front-left-wheel", "back-right-wheel", "back-left-wheel"
     };
+    vector<string> weg_joint_names;
     vector<long> wheel_idxs;
     vector<long> weg_idxs;
 
@@ -266,7 +328,19 @@ int main()
         wheel_props.name = name;
         add_wheel(ugv, wheel_props);
         wheel_idxs.push_back(ugv->getDof(name + "_joint")->getIndexInSkeleton());
-        weg_idxs.push_back(ugv->getDof(name + "_weg_joint")->getIndexInSkeleton());
+
+        rl.add_ellipsoid(name,
+            wheel_dimensions.x() * VIS_SCALE,
+            wheel_dimensions.y() * VIS_SCALE,
+            wheel_dimensions.z() * VIS_SCALE);
+
+        for (size_t weg_idx = 0; weg_idx < weg_count; ++weg_idx) {
+            auto weg_name = name + "_weg_joint" + std::to_string(weg_idx);
+            weg_idxs.push_back(ugv->getDof(weg_name)->getIndexInSkeleton());
+            weg_joint_names.push_back(weg_name);
+
+            rl.add_sphere(name + "_weg" + std::to_string(weg_idx), weg_radius * VIS_SCALE);
+        }
     }
 
 
@@ -295,15 +369,6 @@ int main()
 
     WorldPtr world(new World);
 
-    // The Bullet collision detector uses primitives instead of meshes, which makes
-    // it faster and more useful for this simple application.
-    if (dart::collision::CollisionDetector::getFactory()->canCreate("bullet")) {
-        world->getConstraintSolver()->setCollisionDetector(
-            dart::collision::CollisionDetector::getFactory()->create("bullet"));
-    } else {
-        cerr << "NO BULLET" << endl;
-    }
-
     world->addSkeleton(ugv);
     world->addSkeleton(ground);
     world->setGravity(Vector3d(0.0, -9.80665, 0.0));
@@ -318,114 +383,162 @@ int main()
     // Add obstacles
     //
 
-    auto obstacle1 = add_obstacle();
-    world->addSkeleton(obstacle1.first);
+    auto collisionEngine = world->getConstraintSolver()->getCollisionDetector();
+    auto collisionGroup = world->getConstraintSolver()->getCollisionGroup();
+
+    for (size_t obs_idx = 0; obs_idx < 30; ++obs_idx) {
+        SkeletonPtr skel;
+        Vector3d dims;
+        std::string name;
+
+        std::tie(skel, dims, name) = create_random_box(material_density);
+
+        // Only add object if there is not collision
+        auto newGroup = collisionEngine->createCollisionGroup(skel.get());
+
+        dart::collision::CollisionOption option;
+        dart::collision::CollisionResult result;
+        bool collision = collisionGroup->collide(newGroup.get(), option, &result);
+
+        if(!collision) {
+            world->addSkeleton(skel);
+
+            rl.add_box(name,
+                dims.x() * VIS_SCALE,
+                dims.y() * VIS_SCALE,
+                dims.z() * VIS_SCALE);
+        }
+    }
+
+
+    // The Bullet collision detector uses primitives instead of meshes, which makes
+    // it faster and more useful for this simple application.
+    if (dart::collision::CollisionDetector::getFactory()->canCreate("bullet")) {
+        world->getConstraintSolver()->setCollisionDetector(
+            dart::collision::CollisionDetector::getFactory()->create("bullet"));
+    } else {
+        cerr << "NO BULLET" << endl;
+    }
+
+
+    //
+    // Controllers
+    //
+
+    // The PD controller can be reused by all wegs
+    PDController weg_pd{1, 0.1, TIME_STEP};
+
+    // Direction controller
+    struct State {
+        std::string name;
+        double left_speed, right_speed;
+        double to_left_lo, to_left_hi;
+        double to_right_lo, to_right_hi;
+        double to_forward_lo, to_forward_hi;
+
+        std::string transition(double angle) {
+            if (to_left_lo < angle && angle < to_left_hi) {
+                return "left";
+            } else if (to_right_lo < angle && angle < to_right_hi) {
+                return "right";
+            } else if (to_forward_lo < angle && angle < to_forward_hi) {
+                return "forward";
+            } else {
+                return name;
+            }
+        }
+    };
+
+    double max_speed = 10;
+    std::unordered_map<std::string, State> fsm{{
+        {"forward", {"forward", -max_speed, -max_speed, 10_deg, 2_pi, -2_pi, -10_deg,      1,    -1}},
+        {"left",    {"left",     max_speed, -max_speed,       1,  -1,     1,      -1,  -2_pi, 5_deg}},
+        {"right",   {"right",   -max_speed,  max_speed,       1,  -1,     1,      -1, -5_deg,  2_pi}},
+    }};
+    std::string state("forward");
 
 
     //
     // Simulate the world for some amount of time
     //
 
-    constexpr double TIME_STOP = 10;
-    constexpr double TIME_STEP = 0.005;
-    constexpr double VIS_STEP = 1.0 / 30.0;
-    constexpr double VIS_SCALE = 500;
     world->setTimeStep(TIME_STEP);
 
-    // Create the Revisit logger
-    revisit::logger rl(0.0, VIS_STEP, TIME_STOP);
-
-    rl.add_box(chassis_name,
-        chassis_dimensions.x() * VIS_SCALE,
-        chassis_dimensions.y() * VIS_SCALE,
-        chassis_dimensions.z() * VIS_SCALE);
-
-    for (const auto & name : wheel_names) {
-        rl.add_ellipsoid(name,
-            wheel_dimensions.x() * VIS_SCALE,
-            wheel_dimensions.y() * VIS_SCALE,
-            wheel_dimensions.z() * VIS_SCALE);
-
-        rl.add_sphere(name + "_weg", weg_radius * VIS_SCALE);
-    }
-
-    rl.add_box("obstacle1",
-        obstacle1.second.x() * VIS_SCALE,
-        obstacle1.second.y() * VIS_SCALE,
-        obstacle1.second.z() * VIS_SCALE);
-
-    //
-    // Controllers
-    //
-
-    PDController weg_pd{1, 0.1, TIME_STEP};
-
-
     double next_vis_output_time = 0;
-    int count = 0;
+    double next_control_update_time = 0;
+    double CONTROL_STEP = 0.1;
+
+    rl.add_sphere("target", 5_cm * VIS_SCALE);
+    rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["static"] = true;
+    rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["translation"] =
+        {-50_cm * VIS_SCALE, 0, 50_cm * VIS_SCALE};
+
+    vector<Vector3d> targets{
+        {-50_cm, 0,  50_cm},
+        { 50_cm, 0,  50_cm},
+        {-50_cm, 0, -50_cm},
+        { 50_cm, 0, -50_cm},
+    };
+
+    size_t target_idx = 0;
+
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
         world->step();
 
-        auto wheel_speed = -10;
-        ugv->setCommand(wheel_idxs.at(0), wheel_speed);
-        ugv->setCommand(wheel_idxs.at(1), wheel_speed);
-        ugv->setCommand(wheel_idxs.at(2), wheel_speed);
-        ugv->setCommand(wheel_idxs.at(3), wheel_speed);
+        if (world->getTime() > next_control_update_time) {
+            next_control_update_time += CONTROL_STEP;
 
+            auto chassis_transform = ugv->getBodyNode(chassis_name)->getTransform();
 
-        auto r = 1.5_cm;
-        auto y = ugv->getJoint("front-right-wheel_weg_joint")->getPosition(0);
-        auto dy = ugv->getJoint("front-right-wheel_weg_joint")->getVelocity(0);
-        auto u = weg_pd.get_output(r, y, dy);
+            auto chassis_yaw = chassis_transform.rotation().eulerAngles(2, 0, 2).y();
+            auto chassis_pos = chassis_transform.translation();
 
-        if (++count >= 10) {
-            // cout << world->getTime() << " " << r << " " << y << " " << dy << " " << u << endl;
-            count = 0;
+            auto local_to_global = AngleAxisd(chassis_yaw, Vector3d(0, 1, 0));
+
+            auto Va = local_to_global * Vector3d(1, 0, 0);
+            auto Vb = targets[target_idx] - chassis_pos;
+            auto Vn = Vector3d(0, 1, 0);
+
+            auto angle = std::atan2(Va.cross(Vb).dot(Vn), Va.dot(Vb));
+            state = fsm[state].transition(angle);
+
+            if ((chassis_pos - targets[target_idx]).norm() < 8_cm) {
+                if (++target_idx >= targets.size()) {
+                    break;
+                }
+            }
         }
 
-        ugv->setCommand(weg_idxs.at(0), u);
-        ugv->setCommand(weg_idxs.at(1), u);
-        ugv->setCommand(weg_idxs.at(2), u);
-        ugv->setCommand(weg_idxs.at(3), u);
+            // cout << world->getTime() << " " << angle << " " << state << endl;
 
+            ugv->setCommand(wheel_idxs.at(0), fsm[state].right_speed);
+            ugv->setCommand(wheel_idxs.at(1), fsm[state].left_speed);
+            ugv->setCommand(wheel_idxs.at(2), fsm[state].right_speed);
+            ugv->setCommand(wheel_idxs.at(3), fsm[state].left_speed);
+
+            auto r = wheel_radius - 1_cm;
+            vector<double> weg_commands;
+            for (const auto & weg_joint_name : weg_joint_names) {
+                auto y = ugv->getJoint(weg_joint_name)->getPosition(0);
+                auto dy = ugv->getJoint(weg_joint_name)->getVelocity(0);
+                auto u = weg_pd.get_output(r, y, dy);
+                weg_commands.push_back(u);
+            }
+
+            for (size_t weg_idx = 0; weg_idx < weg_idxs.size(); ++weg_idx) {
+                ugv->setCommand(weg_idxs.at(weg_idx), weg_commands.at(weg_idx));
+            }
 
         if (world->getTime() > next_vis_output_time) {
-
-            // auto chassis_T = chassis_body->getTransform();
-            // auto ch_t = chassis_T.translation() * VIS_SCALE;
-            // Quaterniond ch_q(chassis_T.rotation());
-
-            // rl.add_frame(chassis_name,
-            //     ch_t.x(), ch_t.y(), ch_t.z(),
-            //     ch_q.x(), ch_q.y(), ch_q.z(), ch_q.w());
-
-            // for (const auto & name : wheel_names) {
-            //     auto wheel_T = ugv->getBodyNode(name)->getTransform();
-            //     auto wh_t = wheel_T.translation() * VIS_SCALE;
-            //     Quaterniond wh_q(wheel_T.rotation());
-
-            //     rl.add_to_frame(name,
-            //         wh_t.x(), wh_t.y(), wh_t.z(),
-            //         wh_q.x(), wh_q.y(), wh_q.z(), wh_q.w());
-
-            //     auto weg_T = ugv->getBodyNode(name + "_weg")->getTransform();
-            //     auto wg_t = weg_T.translation() * VIS_SCALE;
-            //     Quaterniond wg_q(weg_T.rotation());
-
-            //     rl.add_to_frame(name + "_weg",
-            //         wg_t.x(), wg_t.y(), wg_t.z(),
-            //         wg_q.x(), wg_q.y(), wg_q.z(), wg_q.w());
-            // }
-
             add_frame_to_rl(rl, world, VIS_SCALE);
-
             next_vis_output_time += VIS_STEP;
         }
 
     }
 
     // Passing false prints a compact JSON representation
+    rl.log_data_["duration"] = (rl.log_data_["frames"].size() - 1) * VIS_STEP;
     cout << rl.to_string() << endl;
     return EXIT_SUCCESS;
 }

@@ -3,7 +3,7 @@
 DYLIB_DIR="$HOME/.local/lib"
 
 COMPILER="clang++"
-CPP_FLAGS="-std=c++14 -Wall -Wextra"
+CPP_FLAGS="-std=c++14 -Wall -Wextra -O3"
 LD_FLAGS="-Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-rpath,/Users/ajc/.local/lib"
 
 BIN_DIR="bin"

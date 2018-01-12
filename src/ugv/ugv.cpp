@@ -1,5 +1,7 @@
 
 #include "../../logger/cpp/logger.hpp"
+#include "../extras/pd_controller.hpp"
+#include "../extras/utilities.hpp"
 
 #include <dart/dart.hpp>
 using namespace dart::dynamics;
@@ -32,32 +34,6 @@ struct WheelProperties
     unsigned num_wegs;
 };
 
-struct PDController
-{
-    double kp_, kd_, dt_;
-    PDController(double kp, double kd, double dt) : kp_(kp), kd_(kd), dt_(dt) {}
-    double get_output(double r, double y, double dy) {
-        return kp_ * (r - y) + kd_ * dy;
-    }
-};
-
-
-// Centimers conversion from SI units
-constexpr long double operator"" _cm (long double meters) {
-    return meters * 0.01;
-}
-constexpr long double operator"" _cm (unsigned long long meters) {
-    return meters * 0.01;
-}
-
-
-// Notation for SI density
-constexpr long double operator"" _kg_per_m3 (long double density) {
-    return density;
-}
-constexpr long double operator"" _kg_per_m3 (unsigned long long density) {
-    return density;
-}
 
 
 auto add_chassis(SkeletonPtr skel, const string & name, const Vector3d & dims,
@@ -160,8 +136,9 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
 
 auto create_random_box(double ugv_density)
 {
-    static std::random_device r;
-    static std::default_random_engine reng(r());
+    // static std::default_random_engine reng(r());
+    static size_t rseed = 0;
+    static std::mt19937 reng(rseed);
 
     // Randomize the size of objects
     static std::uniform_real_distribution<double> uni_real_xz_size(5_cm, 20_cm);
@@ -469,9 +446,9 @@ int main()
     double CONTROL_STEP = 0.1;
 
     rl.add_sphere("target", 5_cm * VIS_SCALE);
-    rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["static"] = true;
-    rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["translation"] =
-        {-50_cm * VIS_SCALE, 0, 50_cm * VIS_SCALE};
+    // rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["static"] = true;
+    // rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["translation"] =
+    //     {-50_cm * VIS_SCALE, 0, 50_cm * VIS_SCALE};
 
     vector<Vector3d> targets{
         {-50_cm, 0,  50_cm},
@@ -481,6 +458,7 @@ int main()
     };
 
     size_t target_idx = 0;
+    bool update_target = true;
 
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
@@ -504,6 +482,7 @@ int main()
             state = fsm[state].transition(angle);
 
             if ((chassis_pos - targets[target_idx]).norm() < 8_cm) {
+                update_target = true;
                 if (++target_idx >= targets.size()) {
                     break;
                 }
@@ -532,13 +511,21 @@ int main()
 
         if (world->getTime() > next_vis_output_time) {
             add_frame_to_rl(rl, world, VIS_SCALE);
+            if (update_target) {
+                rl.add_to_frame("target",
+                    targets[target_idx].x() * VIS_SCALE,
+                    targets[target_idx].y() * VIS_SCALE,
+                    targets[target_idx].z() * VIS_SCALE,
+                    0, 0, 0, 1);
+                update_target = false;
+            }
             next_vis_output_time += VIS_STEP;
         }
 
     }
 
-    // Passing false prints a compact JSON representation
     rl.log_data_["duration"] = (rl.log_data_["frames"].size() - 1) * VIS_STEP;
-    cout << rl.to_string() << endl;
+    // Passing false prints a compact JSON representation
+    cout << rl.to_string(false) << endl;
     return EXIT_SUCCESS;
 }

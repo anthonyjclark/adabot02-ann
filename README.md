@@ -23,6 +23,10 @@ Use the following to add the `logger` submodule:
 ```bash
 git submodule add revisit/logger
 git submodule update --init
+cd logger
+git remote rm origin
+git remote add origin https://github.com/revisit/logger.git
+git push origin master
 ```
 
 To update the submodule, use:

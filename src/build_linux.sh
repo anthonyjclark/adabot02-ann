@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-DYLIB_DIR="$HOME/.local/lib"
+DYLIB_DIR="/usr/lib"
 
-COMPILER="clang++"
+COMPILER="/usr/bin/c++"
 CPP_FLAGS="-std=c++14 -Wall -Wextra -O3"
-LD_FLAGS="-Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-rpath,/Users/ajc/.local/lib"
+LD_FLAGS="-rdynamic"
 
 BIN_DIR="bin"
 
-INC_DIRS="-isystem/usr/local/include/eigen3 -isystem$HOME/.local/include -isystem/usr/local/include/bullet"
-LIB_DIRS="-L$DYLIB_DIR"
-LIBS="-ldart -lassimp -lBulletCollision -lLinearMath -ldart-collision-bullet"
+INC_DIRS="-isystem /usr/include/eigen3 -isystem $HOME/.local/include -isystem /usr/include/bullet"
+LIB_DIRS=""
+LIBS="/usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet"
 
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DYLIB_DIR
 

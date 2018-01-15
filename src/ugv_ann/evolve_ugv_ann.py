@@ -26,7 +26,7 @@ def ugv_ann(g):
     weights = g[1:] / MAXVAL * 20 - 10
 
     cmd = ['../bin/ugv_ann', nn_shape + ' '.join(str(w) for w in weights)]
-    timeout = 10
+    timeout = 15
 
     for attempt in range(3):
         try:

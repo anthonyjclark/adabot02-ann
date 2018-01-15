@@ -150,9 +150,25 @@ int main()
     // cout << "\nOutput :\n" << vec_to_string(b.activate(input2)) << endl;
 
 
+    std::cout << "x sigmoid tanh relu" << std::endl;
+    for (double x = -5.0; x < 5.0; x += 0.1) {
+        Eigen::MatrixXd x_mat(1, 1);
+        x_mat << x;
+        auto fx_sigmoid = sigmoid_act(x_mat);
+        auto fx_tanh = tanh_act(x_mat);
+        auto fx_relu = relu_act(x_mat);
+        std::cout << x
+                  << " " << fx_sigmoid
+                  << " " << fx_tanh
+                  << " " << fx_relu << std::endl;
+    }
+
+    return 0;
+
+
     static size_t rseed = 0;
     static std::mt19937 reng(rseed);
-    static std::uniform_int_distribution<long> uni_int(3, 1000);
+    static std::uniform_int_distribution<long> uni_int(3, 100);
 
     std::chrono::duration<double> eigen_time{0};// = 0;
     std::chrono::duration<double> handwritten_time{0};// = 0;

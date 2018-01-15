@@ -19,13 +19,20 @@ function erun () {
     $@
 }
 
+
+
 function compile () {
-    erun $COMPILER $CPP_FLAGS $LD_FLAGS $INC_DIRS $LIB_DIRS $LIBS $1/$1.cpp -o $BIN_DIR/$1
+    if [ -z "$2" ]; then
+        DEF=""
+    else
+        DEF="-D$2"
+    fi
+    erun $COMPILER $CPP_FLAGS $LD_FLAGS $INC_DIRS $LIB_DIRS $LIBS $1/$1.cpp -o $BIN_DIR/$1 $DEF
 }
 
 function build () {
     if [ -d "$1" ]; then
-        compile "$1"
+        compile "$1" "$2"
     else
         printf "Error: could not find \"""$1""\"\n"
     fi
@@ -49,7 +56,7 @@ case "$1" in
         ;;
 
     build )
-        build ${2%/}
+        build ${2%/} "$3"
         ;;
 
     run )
@@ -57,7 +64,7 @@ case "$1" in
         ;;
     brun )
         printf "*** Building ***\n"
-        build ${2%/}
+        build ${2%/} "$3"
 
         if [ $? -eq 0 ]; then
             printf "*** Running ***\n"

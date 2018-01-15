@@ -27,7 +27,14 @@ function compile () {
     else
         DEF="-D$2"
     fi
-    erun $COMPILER $CPP_FLAGS $LD_FLAGS $INC_DIRS $LIB_DIRS $LIBS $1/$1.cpp -o $BIN_DIR/$1 $DEF
+
+
+    # /usr/bin/c++ -isystem /usr/include/eigen3 -isystem $HOME/.local/include -isystem /usr/include/bullet -std=c++14 -Wall -Wextra -O3 -o ugv_fsm.cpp.o -c ugv_fsm.cpp
+    # /usr/bin/c++ ugv_fsm.cpp.o -o ugv_fsm -rdynamic /usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet
+
+
+    erun $COMPILER $INC_DIRS $CPP_FLAGS -o $BIN_DIR/$1".cpp.o" -c $1/$1".cpp" $DEF
+    erun $COMPILER $BIN_DIR/$1".cpp.o" -o $BIN_DIR/$1 $LD_FLAGS $LIBS
 }
 
 function build () {

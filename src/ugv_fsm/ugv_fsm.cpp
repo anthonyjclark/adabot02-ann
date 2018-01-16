@@ -39,7 +39,7 @@ struct WheelProperties
     string name;
 
     double weg_radius;
-    unsigned num_wegs;
+    size_t num_wegs;
 };
 
 
@@ -133,7 +133,6 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
         weg_pair.second->createShapeNodeWith<CollisionAspect, DynamicsAspect>(weg_shape);
         weg_pair.first->setActuatorType(Joint::VELOCITY);
 
-        // weg_pair.first->setAxis(Vector3d{0, 1, 0});
         weg_pair.first->setAxis(vector_transform * vector_to_point);
     }
 
@@ -142,10 +141,8 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
 }
 
 
-auto create_random_box(double ugv_density)
+auto create_random_box(double ugv_density, size_t rseed=0)
 {
-    // static std::default_random_engine reng(r());
-    static size_t rseed = 0;
     static std::mt19937 reng(rseed);
 
     // Randomize the size of objects
@@ -236,30 +233,11 @@ int main(int argc, char const *argv[])
     constexpr double material_restitution = 0.75;
     constexpr double vertical_offset = 5_cm;
 
-    // Chassis parameters
-    constexpr double wheel_base = 10_cm;
-    constexpr double track_width = 12_cm;
-    constexpr double chassis_height = 4_cm;
-    const string chassis_name{"chassis"};
-    const Vector3d chassis_dimensions{wheel_base, chassis_height, track_width};
-
-    // Wheel parameters
-    constexpr double wheel_radius = 2.5_cm;
-    constexpr double wheel_thickness = 1.5_cm;
-    const Vector3d wheel_dimensions{wheel_radius * 2, wheel_radius * 2, wheel_thickness};
-
-    // Weg parameters
-    constexpr double weg_radius = 0.25_cm;
-    constexpr long weg_count = 3;
-
-    // Simulation parameters
-    constexpr double TIME_STOP = 10;
-    constexpr double TIME_STEP = 0.005;
-
 
     //
     // Parse program arguments
     //
+
 
     if (argc < 2) {
         cerr << "Not enough program arguments." << endl;
@@ -268,30 +246,82 @@ int main(int argc, char const *argv[])
 
     std::istringstream iss(argv[1]);
 
-    // Read NN structure
-    long NI, NH, NO, ACT;
-    iss >> NI >> NH >> NO >> ACT;
+    // Simulation parameters
+    double TIME_STOP;
+    iss >> TIME_STOP;
+    // cerr << "TIME_STOP " << TIME_STOP;
 
-    // Read weights
-    double val;
-    long w_idx = 0;
-    Eigen::MatrixXd weights((NI + 1)*NH + (NH + 1)*NO, 1);
-    while (iss >> val) {
-        weights(w_idx++) = val;
-    }
+    constexpr double TIME_STEP = 0.005;
 
-    if (NI != 5 || NO != 3) {
-        cerr << "Invalid number of inputs or outputs." << endl;
-        return 1;
-    }
+    // Chassis parameters
+    double wheel_base, track_width;
+    iss >> wheel_base >> track_width;
+    // cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width ;
 
-    NN nn(NI, NH, NO, weights, ACT);
-    Eigen::MatrixXd nn_input(1, 5);
-    // angle to target
-    // distance to target
-    // previous left wheel speed
-    // previous right wheel speed
-    // previous weg extension
+    constexpr double chassis_height = 3_cm;
+    const string chassis_name{"chassis"};
+    const Vector3d chassis_dimensions{wheel_base, chassis_height, track_width};
+
+    // Wheel parameters
+    double wheel_radius;
+    iss >> wheel_radius;
+    // cerr << "\nwheel_radius " << wheel_radius;
+
+    constexpr double wheel_thickness = 1.5_cm;
+    const Vector3d wheel_dimensions{wheel_radius * 2, wheel_radius * 2, wheel_thickness};
+
+    // Weg parameters
+    size_t weg_count;
+    double weg_extension_percent;
+    iss >> weg_count >> weg_extension_percent;
+    // cerr << "\nweg_count " << weg_count << "\nweg_extension_percent " << weg_extension_percent;
+
+    constexpr double weg_radius = 0.25_cm;
+
+    // FSM parameters
+    double forward_left, forward_right;
+    double forward_to_left_lo, forward_to_left_hi;
+    double forward_to_right_lo, forward_to_right_hi;
+
+    iss >> forward_left
+        >> forward_right
+        >> forward_to_left_lo
+        >> forward_to_left_hi
+        >> forward_to_right_lo
+        >> forward_to_right_hi;
+
+    // cerr << "\nforward_left " << forward_left
+    //      << "\nforward_right " << forward_right
+    //      << "\nforward_to_left_lo " << forward_to_left_lo
+    //      << "\nforward_to_left_hi " << forward_to_left_hi
+    //      << "\nforward_to_right_lo " << forward_to_right_lo
+    //      << "\nforward_to_right_hi " << forward_to_right_hi;
+
+    double left_left, left_right;
+    double left_to_forward_lo, left_to_forward_hi;
+
+    iss >> left_left
+        >> left_right
+        >> left_to_forward_lo
+        >> left_to_forward_hi;
+
+    // cerr << "\nleft_left " << left_left
+    //      << "\nleft_right " << left_right
+    //      << "\nleft_to_forward_lo " << left_to_forward_lo
+    //      << "\nleft_to_forward_hi " << left_to_forward_hi;
+
+    double right_left, right_right;
+    double right_to_forward_lo, right_to_forward_hi;
+
+    iss >> right_left
+        >> right_right
+        >> right_to_forward_lo
+        >> right_to_forward_hi;
+
+    // cerr << "\nright_left " << right_left
+    //      << "\nright_right " << right_right
+    //      << "\nright_to_forward_lo " << right_to_forward_lo
+    //      << "\nright_to_forward_hi " << right_to_forward_hi << endl;
 
 #ifdef VISUALIZE
 
@@ -487,12 +517,34 @@ int main(int argc, char const *argv[])
         }
     };
 
-    double max_speed = 10;
+    // double max_speed = 10;
+    // std::unordered_map<std::string, State> fsm{{
+    //     {"forward", {"forward", -max_speed, -max_speed, 10_deg, 2_pi, -2_pi, -10_deg,      1,    -1}},
+    //     {"left",    {"left",     max_speed, -max_speed,       1,  -1,     1,      -1,  -2_pi, 5_deg}},
+    //     {"right",   {"right",   -max_speed,  max_speed,       1,  -1,     1,      -1, -5_deg,  2_pi}},
+    // }};
+
     std::unordered_map<std::string, State> fsm{{
-        {"forward", {"forward", -max_speed, -max_speed, 10_deg, 2_pi, -2_pi, -10_deg,      1,    -1}},
-        {"left",    {"left",     max_speed, -max_speed,       1,  -1,     1,      -1,  -2_pi, 5_deg}},
-        {"right",   {"right",   -max_speed,  max_speed,       1,  -1,     1,      -1, -5_deg,  2_pi}},
+        {"forward", {"forward",
+            forward_left, forward_right,
+            forward_to_left_lo, forward_to_left_hi,
+            forward_to_right_lo, forward_to_right_hi,
+            1, -1}
+        },
+        {"left",    {"left",
+            left_left, left_right,
+            1, -1,
+            1, -1,
+            left_to_forward_lo, left_to_forward_hi}
+        },
+        {"right",   {"right",
+            right_left, right_right,
+            1, -1,
+            1, -1,
+            right_to_forward_lo,  right_to_forward_hi}
+        }
     }};
+
     std::string state("forward");
 
 
@@ -502,7 +554,6 @@ int main(int argc, char const *argv[])
 
     world->setTimeStep(TIME_STEP);
 
-    double next_vis_output_time = 0;
     double next_control_update_time = 0;
     constexpr double CONTROL_STEP = 0.1;
     constexpr double MAX_ABS_SPEED = 10;
@@ -526,7 +577,7 @@ int main(int argc, char const *argv[])
 
     double left_speed = 0;
     double right_speed = 0;
-    double weg_extension = 0;
+    double weg_extension = (wheel_radius - 1_cm) * weg_extension_percent;
 
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
@@ -551,34 +602,48 @@ int main(int argc, char const *argv[])
 
             target_dist = (chassis_pos - targets[target_idx]).norm();
 
-
             if (target_dist < 8_cm) {
                 update_target = true;
                 if (++target_idx >= targets.size()) {
                     break;
                 }
             }
+
+            // auto chassis_linear_velocity = ugv->getBodyNode(chassis_name)->getCOMLinearVelocity();
+            // auto temp = ugv->getBodyNode(chassis_name)->getLinearVelocity();
+
+            // cout << chassis_linear_velocity.x() << " " << chassis_linear_velocity.z()
+            //      << " " << temp.x() << " " << temp.y() << endl;
+
+
+            // weg_extension = (wheel_radius - 1_cm) * weg_extension_percent * 0;
+
+            double scaled_max = MAX_ABS_SPEED;
+            right_speed = min(scaled_max, max(-scaled_max, fsm[state].right_speed));
+            left_speed = min(scaled_max, max(-scaled_max, fsm[state].left_speed));
+
+            // right_speed = -10;
+            // left_speed = -5;
         }
 
             // cout << world->getTime() << " " << angle << " " << state << endl;
 
-            ugv->setCommand(wheel_idxs.at(0), fsm[state].right_speed);
-            ugv->setCommand(wheel_idxs.at(1), fsm[state].left_speed);
-            ugv->setCommand(wheel_idxs.at(2), fsm[state].right_speed);
-            ugv->setCommand(wheel_idxs.at(3), fsm[state].left_speed);
+        ugv->setCommand(wheel_idxs.at(0), right_speed);
+        ugv->setCommand(wheel_idxs.at(1), left_speed);
+        ugv->setCommand(wheel_idxs.at(2), right_speed);
+        ugv->setCommand(wheel_idxs.at(3), left_speed);
 
-            auto r = wheel_radius - 1_cm;
-            vector<double> weg_commands;
-            for (const auto & weg_joint_name : weg_joint_names) {
-                auto y = ugv->getJoint(weg_joint_name)->getPosition(0);
-                auto dy = ugv->getJoint(weg_joint_name)->getVelocity(0);
-                auto u = weg_pd.get_output(r, y, dy);
-                weg_commands.push_back(u);
-            }
+        vector<double> weg_commands;
+        for (const auto & weg_joint_name : weg_joint_names) {
+            auto y = ugv->getJoint(weg_joint_name)->getPosition(0);
+            auto dy = ugv->getJoint(weg_joint_name)->getVelocity(0);
+            auto u = weg_pd.get_output(weg_extension, y, dy);
+            weg_commands.push_back(u);
+        }
 
-            for (size_t weg_idx = 0; weg_idx < weg_idxs.size(); ++weg_idx) {
-                ugv->setCommand(weg_idxs.at(weg_idx), weg_commands.at(weg_idx));
-            }
+        for (size_t weg_idx = 0; weg_idx < weg_idxs.size(); ++weg_idx) {
+            ugv->setCommand(weg_idxs.at(weg_idx), weg_commands.at(weg_idx));
+        }
 
 
 #ifdef VISUALIZE

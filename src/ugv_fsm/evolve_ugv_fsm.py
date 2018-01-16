@@ -79,7 +79,7 @@ def ugv_ann(g):
 
 
     cmd = ['../bin/ugv_fsm', args]
-    timeout = 15
+    timeout = 30
 
     for attempt in range(3):
         try:

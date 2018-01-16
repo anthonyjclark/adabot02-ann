@@ -280,14 +280,14 @@ int main(int argc, char const *argv[])
 
     // FSM parameters
     double forward_left, forward_right;
-    double forward_to_left_lo, forward_to_left_hi;
-    double forward_to_right_lo, forward_to_right_hi;
+    double forward_to_left_lo;//, forward_to_left_hi;
+    double /*forward_to_right_lo,*/ forward_to_right_hi;
 
     iss >> forward_left
         >> forward_right
         >> forward_to_left_lo
-        >> forward_to_left_hi
-        >> forward_to_right_lo
+        // >> forward_to_left_hi
+        // >> forward_to_right_lo
         >> forward_to_right_hi;
 
     // cerr << "\nforward_left " << forward_left
@@ -298,11 +298,11 @@ int main(int argc, char const *argv[])
     //      << "\nforward_to_right_hi " << forward_to_right_hi;
 
     double left_left, left_right;
-    double left_to_forward_lo, left_to_forward_hi;
+    double /*left_to_forward_lo,*/ left_to_forward_hi;
 
     iss >> left_left
         >> left_right
-        >> left_to_forward_lo
+        // >> left_to_forward_lo
         >> left_to_forward_hi;
 
     // cerr << "\nleft_left " << left_left
@@ -311,12 +311,12 @@ int main(int argc, char const *argv[])
     //      << "\nleft_to_forward_hi " << left_to_forward_hi;
 
     double right_left, right_right;
-    double right_to_forward_lo, right_to_forward_hi;
+    double right_to_forward_lo;//, right_to_forward_hi;
 
     iss >> right_left
         >> right_right
-        >> right_to_forward_lo
-        >> right_to_forward_hi;
+        >> right_to_forward_lo;
+        // >> right_to_forward_hi;
 
     // cerr << "\nright_left " << right_left
     //      << "\nright_right " << right_right
@@ -527,21 +527,21 @@ int main(int argc, char const *argv[])
     std::unordered_map<std::string, State> fsm{{
         {"forward", {"forward",
             forward_left, forward_right,
-            forward_to_left_lo, forward_to_left_hi,
-            forward_to_right_lo, forward_to_right_hi,
+            forward_to_left_lo, 2_pi,
+            -2_pi, forward_to_right_hi,
             1, -1}
         },
         {"left",    {"left",
             left_left, left_right,
             1, -1,
             1, -1,
-            left_to_forward_lo, left_to_forward_hi}
+            -2_pi, left_to_forward_hi}
         },
         {"right",   {"right",
             right_left, right_right,
             1, -1,
             1, -1,
-            right_to_forward_lo,  right_to_forward_hi}
+            right_to_forward_lo, 2_pi}
         }
     }};
 

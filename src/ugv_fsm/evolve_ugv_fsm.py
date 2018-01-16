@@ -18,7 +18,7 @@ def ugv_ann(g):
     # "10.0 0.1 0.12 0.03 3 0.4 -10 -10 0.18 6 -6 -0.18 10 -10 -6 0.09 -10 10 -0.09 6"
 
     # Simulation duration
-    args = '10.0'
+    args = '30.0'
 
     # wheel_base 10cm, 8cm to 16cm
     args += str(0.08 + (0.16 - 0.08) * g[0] / 10)
@@ -30,56 +30,56 @@ def ugv_ann(g):
     args += str(0.02 + (0.03 - 0.02) * g[2] / 10)
 
     # weg_count 3, 0 to 7
-    args += str(round(0 + (7 - 0) * g[3] / 10))
+    args += str(round(7 * g[3] / 10))
 
     # weg_extension_percent 1, 0 to 1
-    args += str(g[18]/10)
+    args += str(g[4]/10)
 
     # forward_left -10, -10 to 0
-    args += str(-g[4])
-
-    # forward_right -10
     args += str(-g[5])
 
-    # forward_to_left_lo 10deg, -pi to pi
-    args += str(-pi + (pi - (-pi)) * g[6] / 10)
+    # forward_right -10, -10 to 0
+    args += str(-g[6])
 
-    # forward_to_left_hi 2pi
-    args += str(-pi + (pi - (-pi)) * g[7] / 10)
+    # forward_to_left_lo 10deg, 0 to pi
+    args += str(0 + (pi - (0)) * g[7] / 10)
 
-    # forward_to_right_lo -2pi
-    args += str(-pi + (pi - (-pi)) * g[8] / 10)
+    # # forward_to_left_hi 2pi
+    # args += str(0 + (2*pi - (0)) * g[7] / 10)
+
+    # # forward_to_right_lo -2pi
+    # args += str(-pi + (pi - (-pi)) * g[8] / 10)
 
     # forward_to_right_hi -10deg
-    args += str(-pi + (pi - (-pi)) * g[9] / 10)
+    args += str(-pi + (0 - (-pi)) * g[8] / 10)
 
-    # left_left 10
+    # left_left 10, -10 to 10
+    args += str(-10 + (10 - (-10)) * g[9] / 10)
+
+    # left_right -10, -10 to 10
     args += str(-10 + (10 - (-10)) * g[10] / 10)
 
-    # left_right -10
-    args += str(-10 + (10 - (-10)) * g[10] / 10)
-
-    # left_to_forward_lo -2pi
-    args += str(-pi + (pi - (-pi)) * g[12] / 10)
+    # # left_to_forward_lo -2pi
+    # args += str(-pi + (pi - (-pi)) * g[12] / 10)
 
     # left_to_forward_hi 5deg
-    args += str(-pi + (pi - (-pi)) * g[13] / 10)
+    args += str(-pi + (pi - (-pi)) * g[11] / 10)
 
     # right_left -10
-    args += str(-10 + (10 - (-10)) * g[10] / 10)
+    args += str(-10 + (10 - (-10)) * g[12] / 10)
 
     # right_right 10
-    args += str(-10 + (10 - (-10)) * g[10] / 10)
+    args += str(-10 + (10 - (-10)) * g[13] / 10)
 
     # right_to_forward_lo -5deg
-    args += str(-pi + (pi - (-pi)) * g[16] / 10)
+    args += str(-pi + (pi - (-pi)) * g[14] / 10)
 
-    # right_to_forward_hi 2pi
-    args += str(-pi + (pi - (-pi)) * g[17] / 10)
+    # # right_to_forward_hi 2pi
+    # args += str(-pi + (pi - (-pi)) * g[17] / 10)
 
 
     cmd = ['../bin/ugv_fsm', args]
-    timeout = 30
+    timeout = 40
 
     for attempt in range(3):
         try:
@@ -130,7 +130,7 @@ if __name__ == '__main__':
         # 'verb_log': ...
     }
 
-    N = 19
+    N = 15
     initial_genome = np.random.uniform(0, MAXVAL, N)
 
     es = cma.CMAEvolutionStrategy(initial_genome, SIGMA, cma_options)

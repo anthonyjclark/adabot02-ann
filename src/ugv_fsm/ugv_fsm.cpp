@@ -1,5 +1,9 @@
 
-#include "../../logger/cpp/logger.hpp"
+
+#ifdef VISUALIZE
+    #include "../../logger/cpp/logger.hpp"
+#endif
+
 #include "../extras/pd_controller.hpp"
 #include "../extras/utilities.hpp"
 
@@ -19,6 +23,9 @@ using std::endl;
 
 using std::string;
 using std::vector;
+
+using std::min;
+using std::max;
 
 
 struct WheelProperties
@@ -115,7 +122,7 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
 
         // Move the weg into place
         Isometry3d tf_weg{Isometry3d::Identity()};
-        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 1.9, 0);
+        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 2.0 - wp.weg_radius / 2.0, 0);
         auto vector_transform = AngleAxisd(2_pi * weg_idx / wp.num_wegs, Vector3d(0, 0, 1));
         tf_weg.translation() = vector_transform * vector_to_point;
 
@@ -198,29 +205,31 @@ auto create_random_box(double ugv_density)
 }
 
 
-void add_frame_to_rl(revisit::logger & logger, WorldPtr & world, double scale) {
+#ifdef VISUALIZE
+    void add_frame_to_rl(revisit::logger & logger, WorldPtr & world, double scale) {
 
-    logger.new_frame();
+        logger.new_frame();
 
-    for (size_t skel_idx = 0; skel_idx < world->getNumSkeletons(); ++skel_idx) {
+        for (size_t skel_idx = 0; skel_idx < world->getNumSkeletons(); ++skel_idx) {
 
-        auto skel = world->getSkeleton(skel_idx);
-        for (const auto & bnode : skel->getBodyNodes()) {
+            auto skel = world->getSkeleton(skel_idx);
+            for (const auto & bnode : skel->getBodyNodes()) {
 
-            auto T = bnode->getTransform();
-            auto trans = T.translation() * scale;
-            Quaterniond quat(T.rotation());
+                auto T = bnode->getTransform();
+                auto trans = T.translation() * scale;
+                Quaterniond quat(T.rotation());
 
-            logger.add_to_frame(
-                bnode->getName(),
-                trans.x(), trans.y(), trans.z(),
-                quat.x(), quat.y(), quat.z(), quat.w());
+                logger.add_to_frame(
+                    bnode->getName(),
+                    trans.x(), trans.y(), trans.z(),
+                    quat.x(), quat.y(), quat.z(), quat.w());
+            }
         }
     }
-}
+#endif
 
 
-int main()
+int main(int argc, char const *argv[])
 {
     // General parameters
     constexpr double material_density = 700_kg_per_m3;
@@ -244,8 +253,48 @@ int main()
     constexpr long weg_count = 3;
 
     // Simulation parameters
-    constexpr double TIME_STOP = 30;
+    constexpr double TIME_STOP = 10;
     constexpr double TIME_STEP = 0.005;
+
+
+    //
+    // Parse program arguments
+    //
+
+    if (argc < 2) {
+        cerr << "Not enough program arguments." << endl;
+        return 1;
+    }
+
+    std::istringstream iss(argv[1]);
+
+    // Read NN structure
+    long NI, NH, NO, ACT;
+    iss >> NI >> NH >> NO >> ACT;
+
+    // Read weights
+    double val;
+    long w_idx = 0;
+    Eigen::MatrixXd weights((NI + 1)*NH + (NH + 1)*NO, 1);
+    while (iss >> val) {
+        weights(w_idx++) = val;
+    }
+
+    if (NI != 5 || NO != 3) {
+        cerr << "Invalid number of inputs or outputs." << endl;
+        return 1;
+    }
+
+    NN nn(NI, NH, NO, weights, ACT);
+    Eigen::MatrixXd nn_input(1, 5);
+    // angle to target
+    // distance to target
+    // previous left wheel speed
+    // previous right wheel speed
+    // previous weg extension
+
+#ifdef VISUALIZE
+
     constexpr double VIS_STEP = 1.0 / 10.0;
     constexpr double VIS_SCALE = 10;
 
@@ -255,6 +304,7 @@ int main()
     //
 
     revisit::logger rl(VIS_STEP, TIME_STOP);
+#endif
 
 
     //
@@ -273,10 +323,13 @@ int main()
     std::tie(chassis_joint, chassis_body) = add_chassis(ugv, chassis_name,
         chassis_dimensions, material_density, material_restitution);
 
+
+#ifdef VISUALIZE
     rl.add_box(chassis_name,
         chassis_dimensions.x() * VIS_SCALE,
         chassis_dimensions.y() * VIS_SCALE,
         chassis_dimensions.z() * VIS_SCALE);
+#endif
 
 
     //
@@ -307,17 +360,21 @@ int main()
         add_wheel(ugv, wheel_props);
         wheel_idxs.push_back(ugv->getDof(name + "_joint")->getIndexInSkeleton());
 
+#ifdef VISUALIZE
         rl.add_ellipsoid(name,
             wheel_dimensions.x() * VIS_SCALE,
             wheel_dimensions.y() * VIS_SCALE,
             wheel_dimensions.z() * VIS_SCALE);
+#endif
 
         for (size_t weg_idx = 0; weg_idx < weg_count; ++weg_idx) {
             auto weg_name = name + "_weg_joint" + std::to_string(weg_idx);
             weg_idxs.push_back(ugv->getDof(weg_name)->getIndexInSkeleton());
             weg_joint_names.push_back(weg_name);
 
+#ifdef VISUALIZE
             rl.add_sphere(name + "_weg" + std::to_string(weg_idx), weg_radius * VIS_SCALE);
+#endif
         }
     }
 
@@ -381,10 +438,13 @@ int main()
         if(!collision) {
             world->addSkeleton(skel);
 
+
+#ifdef VISUALIZE
             rl.add_box(name,
                 dims.x() * VIS_SCALE,
                 dims.y() * VIS_SCALE,
                 dims.z() * VIS_SCALE);
+#endif
         }
     }
 
@@ -444,12 +504,14 @@ int main()
 
     double next_vis_output_time = 0;
     double next_control_update_time = 0;
-    double CONTROL_STEP = 0.1;
+    constexpr double CONTROL_STEP = 0.1;
+    constexpr double MAX_ABS_SPEED = 10;
 
+
+#ifdef VISUALIZE
+    double next_vis_output_time = 0;
     rl.add_sphere("target", 5_cm * VIS_SCALE);
-    // rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["static"] = true;
-    // rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["translation"] =
-    //     {-50_cm * VIS_SCALE, 0, 50_cm * VIS_SCALE};
+#endif
 
     vector<Vector3d> targets{
         {-50_cm, 0,  50_cm},
@@ -459,13 +521,18 @@ int main()
     };
 
     size_t target_idx = 0;
+    double target_dist = 0.0;
     bool update_target = true;
+
+    double left_speed = 0;
+    double right_speed = 0;
+    double weg_extension = 0;
 
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
         world->step();
 
-        if (world->getTime() > next_control_update_time) {
+        if (world->getTime() >= next_control_update_time) {
             next_control_update_time += CONTROL_STEP;
 
             auto chassis_transform = ugv->getBodyNode(chassis_name)->getTransform();
@@ -482,7 +549,10 @@ int main()
             auto angle = std::atan2(Va.cross(Vb).dot(Vn), Va.dot(Vb));
             state = fsm[state].transition(angle);
 
-            if ((chassis_pos - targets[target_idx]).norm() < 8_cm) {
+            target_dist = (chassis_pos - targets[target_idx]).norm();
+
+
+            if (target_dist < 8_cm) {
                 update_target = true;
                 if (++target_idx >= targets.size()) {
                     break;
@@ -510,6 +580,8 @@ int main()
                 ugv->setCommand(weg_idxs.at(weg_idx), weg_commands.at(weg_idx));
             }
 
+
+#ifdef VISUALIZE
         if (world->getTime() > next_vis_output_time) {
             add_frame_to_rl(rl, world, VIS_SCALE);
             if (update_target) {
@@ -522,11 +594,23 @@ int main()
             }
             next_vis_output_time += VIS_STEP;
         }
+#endif
 
     }
 
+#ifdef VISUALIZE
     rl.log_data_["duration"] = (rl.log_data_["frames"].size() - 1) * VIS_STEP;
     // Passing false prints a compact JSON representation
     cout << rl.to_string(false) << endl;
+
+    cerr << "Targets reached : " << target_idx << endl;
+    cerr << "Dist to next    : " << target_dist << endl;
+    cerr << "Time remaining  : " << std::max(0.0, TIME_STOP - world->getTime()) << endl;
+#else
+    cout << target_idx
+         << "," << target_dist
+         << "," << std::max(0.0, TIME_STOP - world->getTime()) << endl;
+#endif
+
     return EXIT_SUCCESS;
 }

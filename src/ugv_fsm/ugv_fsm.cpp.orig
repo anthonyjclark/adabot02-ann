@@ -1,12 +1,7 @@
 
-
-#ifdef VISUALIZE
-    #include "../../logger/cpp/logger.hpp"
-#endif
-
+#include "../../logger/cpp/logger.hpp"
 #include "../extras/pd_controller.hpp"
 #include "../extras/utilities.hpp"
-#include "../extras/nn/nn.hpp"
 
 
 #include <dart/dart.hpp>
@@ -24,9 +19,6 @@ using std::endl;
 
 using std::string;
 using std::vector;
-
-using std::min;
-using std::max;
 
 
 struct WheelProperties
@@ -123,7 +115,7 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
 
         // Move the weg into place
         Isometry3d tf_weg{Isometry3d::Identity()};
-        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 2.0 - wp.weg_radius / 2.0, 0);
+        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 1.9, 0);
         auto vector_transform = AngleAxisd(2_pi * weg_idx / wp.num_wegs, Vector3d(0, 0, 1));
         tf_weg.translation() = vector_transform * vector_to_point;
 
@@ -206,31 +198,29 @@ auto create_random_box(double ugv_density)
 }
 
 
-#ifdef VISUALIZE
-    void add_frame_to_rl(revisit::logger & logger, WorldPtr & world, double scale) {
+void add_frame_to_rl(revisit::logger & logger, WorldPtr & world, double scale) {
 
-        logger.new_frame();
+    logger.new_frame();
 
-        for (size_t skel_idx = 0; skel_idx < world->getNumSkeletons(); ++skel_idx) {
+    for (size_t skel_idx = 0; skel_idx < world->getNumSkeletons(); ++skel_idx) {
 
-            auto skel = world->getSkeleton(skel_idx);
-            for (const auto & bnode : skel->getBodyNodes()) {
+        auto skel = world->getSkeleton(skel_idx);
+        for (const auto & bnode : skel->getBodyNodes()) {
 
-                auto T = bnode->getTransform();
-                auto trans = T.translation() * scale;
-                Quaterniond quat(T.rotation());
+            auto T = bnode->getTransform();
+            auto trans = T.translation() * scale;
+            Quaterniond quat(T.rotation());
 
-                logger.add_to_frame(
-                    bnode->getName(),
-                    trans.x(), trans.y(), trans.z(),
-                    quat.x(), quat.y(), quat.z(), quat.w());
-            }
+            logger.add_to_frame(
+                bnode->getName(),
+                trans.x(), trans.y(), trans.z(),
+                quat.x(), quat.y(), quat.z(), quat.w());
         }
     }
-#endif
+}
 
 
-int main(int argc, char const *argv[])
+int main()
 {
     // General parameters
     constexpr double material_density = 700_kg_per_m3;
@@ -254,48 +244,8 @@ int main(int argc, char const *argv[])
     constexpr long weg_count = 3;
 
     // Simulation parameters
-    constexpr double TIME_STOP = 10;
+    constexpr double TIME_STOP = 30;
     constexpr double TIME_STEP = 0.005;
-
-
-    //
-    // Parse program arguments
-    //
-
-    if (argc < 2) {
-        cerr << "Not enough program arguments." << endl;
-        return 1;
-    }
-
-    std::istringstream iss(argv[1]);
-
-    // Read NN structure
-    long NI, NH, NO, ACT;
-    iss >> NI >> NH >> NO >> ACT;
-
-    // Read weights
-    double val;
-    long w_idx = 0;
-    Eigen::MatrixXd weights((NI + 1)*NH + (NH + 1)*NO, 1);
-    while (iss >> val) {
-        weights(w_idx++) = val;
-    }
-
-    if (NI != 5 || NO != 3) {
-        cerr << "Invalid number of inputs or outputs." << endl;
-        return 1;
-    }
-
-    NN nn(NI, NH, NO, weights, ACT);
-    Eigen::MatrixXd nn_input(1, 5);
-    // angle to target
-    // distance to target
-    // previous left wheel speed
-    // previous right wheel speed
-    // previous weg extension
-
-#ifdef VISUALIZE
-
     constexpr double VIS_STEP = 1.0 / 10.0;
     constexpr double VIS_SCALE = 10;
 
@@ -305,7 +255,6 @@ int main(int argc, char const *argv[])
     //
 
     revisit::logger rl(VIS_STEP, TIME_STOP);
-#endif
 
 
     //
@@ -324,13 +273,10 @@ int main(int argc, char const *argv[])
     std::tie(chassis_joint, chassis_body) = add_chassis(ugv, chassis_name,
         chassis_dimensions, material_density, material_restitution);
 
-
-#ifdef VISUALIZE
     rl.add_box(chassis_name,
         chassis_dimensions.x() * VIS_SCALE,
         chassis_dimensions.y() * VIS_SCALE,
         chassis_dimensions.z() * VIS_SCALE);
-#endif
 
 
     //
@@ -361,21 +307,17 @@ int main(int argc, char const *argv[])
         add_wheel(ugv, wheel_props);
         wheel_idxs.push_back(ugv->getDof(name + "_joint")->getIndexInSkeleton());
 
-#ifdef VISUALIZE
         rl.add_ellipsoid(name,
             wheel_dimensions.x() * VIS_SCALE,
             wheel_dimensions.y() * VIS_SCALE,
             wheel_dimensions.z() * VIS_SCALE);
-#endif
 
         for (size_t weg_idx = 0; weg_idx < weg_count; ++weg_idx) {
             auto weg_name = name + "_weg_joint" + std::to_string(weg_idx);
             weg_idxs.push_back(ugv->getDof(weg_name)->getIndexInSkeleton());
             weg_joint_names.push_back(weg_name);
 
-#ifdef VISUALIZE
             rl.add_sphere(name + "_weg" + std::to_string(weg_idx), weg_radius * VIS_SCALE);
-#endif
         }
     }
 
@@ -439,13 +381,10 @@ int main(int argc, char const *argv[])
         if(!collision) {
             world->addSkeleton(skel);
 
-
-#ifdef VISUALIZE
             rl.add_box(name,
                 dims.x() * VIS_SCALE,
                 dims.y() * VIS_SCALE,
                 dims.z() * VIS_SCALE);
-#endif
         }
     }
 
@@ -467,6 +406,35 @@ int main(int argc, char const *argv[])
     // The PD controller can be reused by all wegs
     PDController weg_pd{1, 0.1, TIME_STEP};
 
+    // Direction controller
+    struct State {
+        std::string name;
+        double left_speed, right_speed;
+        double to_left_lo, to_left_hi;
+        double to_right_lo, to_right_hi;
+        double to_forward_lo, to_forward_hi;
+
+        std::string transition(double angle) {
+            if (to_left_lo < angle && angle < to_left_hi) {
+                return "left";
+            } else if (to_right_lo < angle && angle < to_right_hi) {
+                return "right";
+            } else if (to_forward_lo < angle && angle < to_forward_hi) {
+                return "forward";
+            } else {
+                return name;
+            }
+        }
+    };
+
+    double max_speed = 10;
+    std::unordered_map<std::string, State> fsm{{
+        {"forward", {"forward", -max_speed, -max_speed, 10_deg, 2_pi, -2_pi, -10_deg,      1,    -1}},
+        {"left",    {"left",     max_speed, -max_speed,       1,  -1,     1,      -1,  -2_pi, 5_deg}},
+        {"right",   {"right",   -max_speed,  max_speed,       1,  -1,     1,      -1, -5_deg,  2_pi}},
+    }};
+    std::string state("forward");
+
 
     //
     // Simulate the world for some amount of time
@@ -474,15 +442,14 @@ int main(int argc, char const *argv[])
 
     world->setTimeStep(TIME_STEP);
 
-    double next_control_update_time = 0;
-    constexpr double CONTROL_STEP = 0.1;
-    constexpr double MAX_ABS_SPEED = 10;
-
-
-#ifdef VISUALIZE
     double next_vis_output_time = 0;
+    double next_control_update_time = 0;
+    double CONTROL_STEP = 0.1;
+
     rl.add_sphere("target", 5_cm * VIS_SCALE);
-#endif
+    // rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["static"] = true;
+    // rl.log_data_["objects"][rl.log_data_["objects"].size() - 1]["translation"] =
+    //     {-50_cm * VIS_SCALE, 0, 50_cm * VIS_SCALE};
 
     vector<Vector3d> targets{
         {-50_cm, 0,  50_cm},
@@ -495,15 +462,11 @@ int main(int argc, char const *argv[])
     double target_dist = 0.0;
     bool update_target = true;
 
-    double left_speed = 0;
-    double right_speed = 0;
-    double weg_extension = 0;
-
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
         world->step();
 
-        if (world->getTime() >= next_control_update_time) {
+        if (world->getTime() > next_control_update_time) {
             next_control_update_time += CONTROL_STEP;
 
             auto chassis_transform = ugv->getBodyNode(chassis_name)->getTransform();
@@ -518,8 +481,9 @@ int main(int argc, char const *argv[])
             auto Vn = Vector3d(0, 1, 0);
 
             auto angle = std::atan2(Va.cross(Vb).dot(Vn), Va.dot(Vb));
-            target_dist = (chassis_pos - targets[target_idx]).norm();
+            state = fsm[state].transition(angle);
 
+            target_dist = (chassis_pos - targets[target_idx]).norm();
 
             if (target_dist < 8_cm) {
                 update_target = true;
@@ -527,63 +491,28 @@ int main(int argc, char const *argv[])
                     break;
                 }
             }
-
-
-            nn_input(0) = angle;
-            nn_input(1) = target_dist;
-            nn_input(2) = left_speed;
-            nn_input(3) = right_speed;
-            nn_input(4) = weg_extension;
-
-            Eigen::MatrixXd nn_output = nn.activate(nn_input);
-            Eigen::MatrixXd nn_output_scaled = nn_output.array().min(1).max(0);
-
-            double l = nn_output_scaled(0);
-            double r = nn_output_scaled(1);
-            double w = nn_output_scaled(2);
-
-            constexpr double max_w = wheel_radius - 1_cm;
-            weg_extension = w * max_w;
-
-            constexpr double min_s = -MAX_ABS_SPEED;
-            constexpr double max_s = MAX_ABS_SPEED;
-
-            // Speed scaled by weg extension
-            left_speed = (l * (max_s - min_s) + min_s) * (1.0 - (w / 2.0));
-            right_speed = (r * (max_s - min_s) + min_s) * (1.0 - (w / 2.0));
-
-            // cout << world->getTime()
-            //      << " " << left_speed
-            //      << " " << right_speed
-            //      << " " << weg_extension
-            //      << " " << l
-            //      << " " << r
-            //      << " " << w
-            //      << "\n" << nn_output
-            //      << endl;
         }
 
-        // cout << world->getTime() << " " << angle << " " << state << endl;
+            // cout << world->getTime() << " " << angle << " " << state << endl;
 
-        ugv->setCommand(wheel_idxs.at(0), right_speed);
-        ugv->setCommand(wheel_idxs.at(1), left_speed);
-        ugv->setCommand(wheel_idxs.at(2), right_speed);
-        ugv->setCommand(wheel_idxs.at(3), left_speed);
+            ugv->setCommand(wheel_idxs.at(0), fsm[state].right_speed);
+            ugv->setCommand(wheel_idxs.at(1), fsm[state].left_speed);
+            ugv->setCommand(wheel_idxs.at(2), fsm[state].right_speed);
+            ugv->setCommand(wheel_idxs.at(3), fsm[state].left_speed);
 
-        vector<double> weg_commands;
-        for (const auto & weg_joint_name : weg_joint_names) {
-            auto y = ugv->getJoint(weg_joint_name)->getPosition(0);
-            auto dy = ugv->getJoint(weg_joint_name)->getVelocity(0);
-            auto u = weg_pd.get_output(weg_extension, y, dy);
-            weg_commands.push_back(u);
-        }
+            auto r = wheel_radius - 1_cm;
+            vector<double> weg_commands;
+            for (const auto & weg_joint_name : weg_joint_names) {
+                auto y = ugv->getJoint(weg_joint_name)->getPosition(0);
+                auto dy = ugv->getJoint(weg_joint_name)->getVelocity(0);
+                auto u = weg_pd.get_output(r, y, dy);
+                weg_commands.push_back(u);
+            }
 
-        for (size_t weg_idx = 0; weg_idx < weg_idxs.size(); ++weg_idx) {
-            ugv->setCommand(weg_idxs.at(weg_idx), weg_commands.at(weg_idx));
-        }
+            for (size_t weg_idx = 0; weg_idx < weg_idxs.size(); ++weg_idx) {
+                ugv->setCommand(weg_idxs.at(weg_idx), weg_commands.at(weg_idx));
+            }
 
-
-#ifdef VISUALIZE
         if (world->getTime() > next_vis_output_time) {
             add_frame_to_rl(rl, world, VIS_SCALE);
             if (update_target) {
@@ -596,22 +525,23 @@ int main(int argc, char const *argv[])
             }
             next_vis_output_time += VIS_STEP;
         }
-#endif
 
     }
 
-#ifdef VISUALIZE
     rl.log_data_["duration"] = (rl.log_data_["frames"].size() - 1) * VIS_STEP;
     // Passing false prints a compact JSON representation
     cout << rl.to_string(false) << endl;
+
     cerr << "Targets reached : " << target_idx << endl;
     cerr << "Dist to next    : " << target_dist << endl;
     cerr << "Time remaining  : " << std::max(0.0, TIME_STOP - world->getTime()) << endl;
-#else
-    cout << target_idx
-         << "," << target_dist
-         << "," << std::max(0.0, TIME_STOP - world->getTime()) << endl;
-#endif
+
+
+double fit1 = 2 * target_idx;
+double fit2 = std::min(target_dist, 1.5) / 1.5;
+double fit3 = std::max(0.0, TIME_STOP - world->getTime()) / 10;
+double fitness = -fit1 + fit2 - fit3;
+    cerr << "Fitness         : " << fitness << endl;
 
     return EXIT_SUCCESS;
 }

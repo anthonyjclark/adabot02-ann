@@ -85,8 +85,6 @@ def genome_to_args(g):
 
 def ugv_fsm(args):
 
-    print(args)
-
     cmd = ['../bin/ugv_fsm', args]
     timeout = 40
 

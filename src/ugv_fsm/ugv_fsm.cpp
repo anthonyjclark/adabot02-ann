@@ -249,14 +249,14 @@ int main(int argc, char const *argv[])
     // Simulation parameters
     double TIME_STOP;
     iss >> TIME_STOP;
-    // cerr << "TIME_STOP " << TIME_STOP;
+    cerr << "TIME_STOP " << TIME_STOP;
 
     constexpr double TIME_STEP = 0.005;
 
     // Chassis parameters
     double wheel_base, track_width;
     iss >> wheel_base >> track_width;
-    // cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width ;
+    cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width ;
 
     constexpr double chassis_height = 3_cm;
     const string chassis_name{"chassis"};
@@ -265,7 +265,7 @@ int main(int argc, char const *argv[])
     // Wheel parameters
     double wheel_radius;
     iss >> wheel_radius;
-    // cerr << "\nwheel_radius " << wheel_radius;
+    cerr << "\nwheel_radius " << wheel_radius;
 
     constexpr double wheel_thickness = 1.5_cm;
     const Vector3d wheel_dimensions{wheel_radius * 2, wheel_radius * 2, wheel_thickness};
@@ -274,7 +274,7 @@ int main(int argc, char const *argv[])
     size_t weg_count;
     double weg_extension_percent;
     iss >> weg_count >> weg_extension_percent;
-    // cerr << "\nweg_count " << weg_count << "\nweg_extension_percent " << weg_extension_percent;
+    cerr << "\nweg_count " << weg_count << "\nweg_extension_percent " << weg_extension_percent;
 
     constexpr double weg_radius = 0.25_cm;
 
@@ -290,12 +290,12 @@ int main(int argc, char const *argv[])
         // >> forward_to_right_lo
         >> forward_to_right_hi;
 
-    // cerr << "\nforward_left " << forward_left
-    //      << "\nforward_right " << forward_right
-    //      << "\nforward_to_left_lo " << forward_to_left_lo
+    cerr << "\nforward_left " << forward_left
+         << "\nforward_right " << forward_right
+         << "\nforward_to_left_lo " << forward_to_left_lo * 180 / 3.145926
     //      << "\nforward_to_left_hi " << forward_to_left_hi
     //      << "\nforward_to_right_lo " << forward_to_right_lo
-    //      << "\nforward_to_right_hi " << forward_to_right_hi;
+         << "\nforward_to_right_hi " << forward_to_right_hi * 180 / 3.145926;
 
     double left_left, left_right;
     double /*left_to_forward_lo,*/ left_to_forward_hi;
@@ -305,10 +305,10 @@ int main(int argc, char const *argv[])
         // >> left_to_forward_lo
         >> left_to_forward_hi;
 
-    // cerr << "\nleft_left " << left_left
-    //      << "\nleft_right " << left_right
+    cerr << "\nleft_left " << left_left
+         << "\nleft_right " << left_right
     //      << "\nleft_to_forward_lo " << left_to_forward_lo
-    //      << "\nleft_to_forward_hi " << left_to_forward_hi;
+         << "\nleft_to_forward_hi " << left_to_forward_hi * 180 / 3.145926;
 
     double right_left, right_right;
     double right_to_forward_lo;//, right_to_forward_hi;
@@ -318,9 +318,9 @@ int main(int argc, char const *argv[])
         >> right_to_forward_lo;
         // >> right_to_forward_hi;
 
-    // cerr << "\nright_left " << right_left
-    //      << "\nright_right " << right_right
-    //      << "\nright_to_forward_lo " << right_to_forward_lo
+    cerr << "\nright_left " << right_left
+         << "\nright_right " << right_right
+         << "\nright_to_forward_lo " << right_to_forward_lo * 180 / 3.145926 << endl;
     //      << "\nright_to_forward_hi " << right_to_forward_hi << endl;
 
 #ifdef VISUALIZE

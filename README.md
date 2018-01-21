@@ -35,3 +35,7 @@ To update the submodule, use:
 cd revisit-logger
 git pull
 ```
+
+## TODO
+
+- template NN and BNN

@@ -650,7 +650,7 @@ int main(int argc, char const *argv[])
     }
 
     // zero target_dist if all 4 targets have been reached
-    target_dist = arget_idx >= targets.size() ? 0 : target_dist;
+    target_dist = target_idx >= targets.size() ? 0 : target_dist;
 
 #ifdef VISUALIZE
     rl.log_data_["duration"] = (rl.log_data_["frames"].size() - 1) * VIS_STEP;

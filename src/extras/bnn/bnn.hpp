@@ -7,6 +7,10 @@
 #include <cmath>
 
 
+
+// #include <iostream>
+
+
 // http://eigen.tuxfamily.org/dox/group__QuickRefPage.html#title6
 // https://stats.stackexchange.com/questions/115258/
 // comprehensive-list-of-activation-functions-in-neural-networks-with-pros-cons
@@ -63,6 +67,8 @@ public:
     Eigen::MatrixXd activate(Eigen::MatrixXd input) {
         input.conservativeResize(Eigen::NoChange, input.cols() + 1);
         input(input.size() - 1) = BIAS_VAL;
+        // std::cout << input.rows() << ", " << input.cols() << std::endl;
+        // std::cout << weights_.rows() << ", " << weights_.cols() << std::endl;
         return activation_function(input * weights_);
     }
 };

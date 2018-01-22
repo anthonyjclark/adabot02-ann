@@ -251,14 +251,19 @@ int main(int argc, char const *argv[])
     // Simulation parameters
     double TIME_STOP;
     iss >> TIME_STOP;
-    cerr << "TIME_STOP " << TIME_STOP;
+    // cerr << "TIME_STOP " << TIME_STOP;
 
     constexpr double TIME_STEP = 0.005;
+
+    // Number of obstacles
+    size_t num_obstacles, obstacle_seed;
+    iss >> num_obstacles >> obstacle_seed;
+    // cerr << "\nnum_obstacles " << num_obstacles << "\nobstacle_seed " << obstacle_seed;
 
     // Chassis parameters
     double wheel_base, track_width;
     iss >> wheel_base >> track_width;
-    cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width ;
+    // cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width ;
 
     constexpr double chassis_height = 3_cm;
     const string chassis_name{"chassis"};
@@ -267,7 +272,7 @@ int main(int argc, char const *argv[])
     // Wheel parameters
     double wheel_radius;
     iss >> wheel_radius;
-    cerr << "\nwheel_radius " << wheel_radius;
+    // cerr << "\nwheel_radius " << wheel_radius;
 
     constexpr double wheel_thickness = 1.5_cm;
     const Vector3d wheel_dimensions{wheel_radius * 2, wheel_radius * 2, wheel_thickness};
@@ -276,34 +281,15 @@ int main(int argc, char const *argv[])
     size_t weg_count;
     double weg_extension_percent;
     iss >> weg_count >> weg_extension_percent;
-    cerr << "\nweg_count " << weg_count << "\nweg_extension_percent " << weg_extension_percent;
+    // cerr << "\nweg_count " << weg_count << "\nweg_extension_percent " << weg_extension_percent;
 
     constexpr double weg_radius = 0.25_cm;
-    constexpr long weg_count = 3;
 
-    // Simulation parameters
-    constexpr double TIME_STOP = 10;
-    constexpr double TIME_STEP = 0.005;
-
-
-    //
-    // Parse program arguments
-    //
-
-    if (argc < 2) {
-        cerr << "Not enough program arguments." << endl;
-        return 1;
-    }
-
-    std::istringstream iss(argv[1]);
-
-    // Number of obstacles
-    size_t num_obstacles, obstacle_seed;
-    iss >> num_obstacles >> obstacle_seed;
 
     // Read BNN structure
     long NI, NO, ACT;
     iss >> NI >> NO >> ACT;
+    // cerr << "\nNI " << NI << "\nNO " << NO << "\nACT " << ACT << endl;
 
     // Read weights
     double val;
@@ -313,14 +299,16 @@ int main(int argc, char const *argv[])
         weights(w_idx++) = val;
     }
 
-    if (NI != 5 || NO != 3) {
+    if (NI != 3 || NO != 3) {
         cerr << "Invalid number of inputs or outputs." << endl;
         return 1;
     }
 
     BNN bnn(NI, NO, weights, ACT);
-    Eigen::MatrixXd bnn_input(1, 5);
+    Eigen::MatrixXd nn_input(1, NI);
     // angle to target
+    // linear speed error
+    // angular speed error
 
 
 #ifdef VISUALIZE
@@ -505,7 +493,9 @@ int main(int argc, char const *argv[])
 
     double next_control_update_time = 0;
     constexpr double CONTROL_STEP = 0.1;
-    constexpr double MAX_ABS_SPEED = 10;
+
+    // 730 RPM --> 76.44542115 rad/s
+    constexpr double MAX_ABS_SPEED = 30;
 
 
 #ifdef VISUALIZE
@@ -528,6 +518,10 @@ int main(int argc, char const *argv[])
     double right_speed = 0;
     double weg_extension = 0;
 
+    double angular_speed_error = 0;
+    double linear_speed_error = 0;
+    double alpha = 0.25;
+
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
         world->step();
@@ -549,7 +543,6 @@ int main(int argc, char const *argv[])
             auto angle = std::atan2(Va.cross(Vb).dot(Vn), Va.dot(Vb));
             target_dist = (chassis_pos - targets[target_idx]).norm();
 
-
             if (target_dist < 8_cm) {
                 update_target = true;
                 if (++target_idx >= targets.size()) {
@@ -557,29 +550,57 @@ int main(int argc, char const *argv[])
                 }
             }
 
+            double linear_speed = ugv->getBodyNode(chassis_name)->getLinearVelocity().norm();
+            double angular_speed = ugv->getBodyNode(chassis_name)->getAngularVelocity().y();
+
+            // expected angular speed: w = (Vr - Vl) / l
+            double Vr = right_speed * wheel_radius;
+            double Vl = left_speed * wheel_radius;
+
+            double expected_angular_speed = -(Vr - Vl) / track_width;
+            double expected_linear_speed = -(Vr + Vl) / 2.0;
+
+            double angular_error = abs(angular_speed - expected_angular_speed);
+            double linear_error = abs(linear_speed - expected_linear_speed);
+
+            angular_speed_error = (alpha * angular_error) + (1.0 - alpha) * angular_speed_error;
+            linear_speed_error = (alpha * linear_error) + (1.0 - alpha) * linear_speed_error;
+
+            // cout << world->getTime()
+            //      << "," << linear_speed
+            //      << "," << expected_linear_speed
+            //      << "," << linear_speed_error
+            //      << "," << angular_speed
+            //      << "," << expected_angular_speed
+            //      << "," << angular_speed_error << endl;
 
             nn_input(0) = angle;
-            nn_input(1) = target_dist;
-            nn_input(2) = left_speed;
-            nn_input(3) = right_speed;
-            nn_input(4) = weg_extension;
+            nn_input(1) = angular_speed_error / 10;
+            nn_input(2) = linear_speed_error;
 
-            Eigen::MatrixXd nn_output = nn.activate(nn_input);
-            Eigen::MatrixXd nn_output_scaled = nn_output.array().min(1).max(0);
+            Eigen::MatrixXd nn_output = bnn.activate(nn_input);
+            Eigen::MatrixXd nn_output_clamped = nn_output.array().min(1).max(0);
 
-            double l = nn_output_scaled(0);
-            double r = nn_output_scaled(1);
-            double w = nn_output_scaled(2);
+            double l = nn_output_clamped(0);
+            double r = nn_output_clamped(1);
+            double w = nn_output_clamped(2);
 
-            constexpr double max_w = wheel_radius - 1_cm;
-            weg_extension = w * max_w;
-
+            const double max_w = wheel_radius - 1_cm;
             constexpr double min_s = -MAX_ABS_SPEED;
             constexpr double max_s = MAX_ABS_SPEED;
 
+            weg_extension = w * max_w;
+
             // Speed scaled by weg extension
-            left_speed = (l * (max_s - min_s) + min_s) * (1.0 - (w / 2.0));
-            right_speed = (r * (max_s - min_s) + min_s) * (1.0 - (w / 2.0));
+            double w_speed_scale_factor = 1.0 - (w / 2.0);
+            left_speed = (l * (max_s - min_s) + min_s) * w_speed_scale_factor;
+            right_speed = (r * (max_s - min_s) + min_s) * w_speed_scale_factor;
+
+// left_speed = -10;
+// right_speed = -10;
+// weg_extension = 0;
+
+// if (world->getTime() > 3.3 && world->getTime() < 6.6) right_speed = 10;
 
             // cout << world->getTime()
             //      << " " << left_speed

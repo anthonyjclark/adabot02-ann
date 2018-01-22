@@ -13,25 +13,27 @@ import sys
 MAXVAL = 10
 SIGMA = 2
 
+SIM_TIME = 30
+
 
 def genome_to_args(g):
 
     # a + (b-a) × x/10
 
     # TIME_STOP, num_obstacles, obstacle_seed
-    args = ['30.0', '0', '0']
+    args = [str(SIM_TIME), '0', '0']
 
     # wheel_base 10cm, 8cm to 16cm
-    args.append(str(0.08 + (0.16 - 0.08) * g[0] / 10))
+    args.append(str(0.08 + (0.16 - 0.08) * g[0] / MAXVAL))
 
     # track_width 12cm, 8cm to 16cm
-    args.append(str(0.08 + (0.16 - 0.08) * g[1] / 10))
+    args.append(str(0.08 + (0.16 - 0.08) * g[1] / MAXVAL))
 
     # wheel_radius 2.5cm, 2cm to 3cm
-    args.append(str(0.02 + (0.03 - 0.02) * g[2] / 10))
+    args.append(str(0.02 + (0.03 - 0.02) * g[2] / MAXVAL))
 
     # weg_count 3, 0 to 7
-    args.append(str(int(round(7 * g[3] / 10))))
+    args.append(str(int(round(7 * g[3] / MAXVAL))))
 
     # NI, NO, ACT
     NI = 3
@@ -43,7 +45,7 @@ def genome_to_args(g):
     # weights
     N = (NI + 1) * NO
     for i in range(5, 5 + N):
-        args.append(str(g[i]/10))
+        args.append(str(-4 + 8 * g[i] / MAXVAL))
 
     return ugv_bnn(' '.join(args))
 
@@ -51,7 +53,7 @@ def genome_to_args(g):
 def ugv_bnn(args):
 
     cmd = ['./ugv_bnn', args]
-    timeout = 40
+    timeout = SIM_TIME * 1.2
 
     for attempt in range(3):
         try:
@@ -70,7 +72,7 @@ def ugv_bnn(args):
             fit2 = min(dist_to_next, 1.5) / 1.5
 
             # Higher is better
-            fit3 = time_remaining / 10
+            fit3 = time_remaining / SIM_TIME
 
             fitness = -fit1 + fit2 - fit3
 
@@ -101,9 +103,6 @@ def evolve(initial_genome):
         'integer_variables': [3, 4],
         # 'verb_log': ...
     }
-
-    # N = 15
-    # initial_genome = np.random.uniform(0, MAXVAL, N)
 
     es = cma.CMAEvolutionStrategy(initial_genome, SIGMA, cma_options)
 

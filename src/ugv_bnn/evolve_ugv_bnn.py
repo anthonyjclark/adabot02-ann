@@ -57,7 +57,7 @@ def ugv_bnn(args):
         try:
             result = sp.run(cmd, stdout=sp.PIPE, stderr=sp.PIPE, timeout=timeout, check=True)
 
-            # 'Targets reached : 0\nDist to next    : 0.713236\nTime remaining  : 0\n'
+            # target_idx,target_dist,time_remaining
             sim_output = str(result.stdout, 'utf-8').split(',')
             targets_reached = float(sim_output[0])
             dist_to_next = float(sim_output[1])
@@ -107,12 +107,12 @@ def evolve(initial_genome):
 
     es = cma.CMAEvolutionStrategy(initial_genome, SIGMA, cma_options)
 
-    with EvalParallel(es.popsize + 1) as eval_all:
+    with EvalParallel() as eval_all:
         while not es.stop():
             X = es.ask()
             es.tell(X, eval_all(genome_to_args, X))
             es.disp()
-            # es.logger.add()
+            es.logger.add()
 
 
 if __name__ == '__main__':
@@ -122,51 +122,3 @@ if __name__ == '__main__':
     else:
         initial_genome = np.random.uniform(0, MAXVAL, 17)
         evolve(initial_genome)
-
-
-"""
-30.0 0.1 0.12 0.025 3 0.4 -10 -10 0.18 -0.18 10 -10 0.09 -10 10 -0.09
--3.0743666666666667
-TIME_STOP 30
-wheel_base 0.1
-track_width 0.12
-wheel_radius 0.025
-weg_count 3
-weg_extension_percent 0.4
-forward_left -10
-forward_right -10
-forward_to_left_lo 0.18
-forward_to_right_hi -0.18
-left_left 10
-left_right -10
-left_to_forward_hi 0.09
-right_left -10
-right_right 10
-right_to_forward_lo -0.09
-Targets reached : 2
-Dist to next    : 1.38845
-Time remaining  : 0
-
-
-30.0 0.1 0.12 0.025 3 0.4 -10 -10 0.18849555921538758 -0.1884955592153874 10.0 -10.0 0.09424777960769379 -10.0 10.0 -0.0942477796076937
--1.4723493333333333
-TIME_STOP 30
-wheel_base 0.1
-track_width 0.12
-wheel_radius 0.025
-weg_count 3
-weg_extension_percent 0.4
-forward_left -10
-forward_right -10
-forward_to_left_lo 0.188496
-forward_to_right_hi -0.188496
-left_left 10
-left_right -10
-left_to_forward_hi 0.0942478
-right_left -10
-right_right 10
-right_to_forward_lo -0.0942478
-Targets reached : 1
-Dist to next    : 0.791476
-Time remaining  : 0
-"""

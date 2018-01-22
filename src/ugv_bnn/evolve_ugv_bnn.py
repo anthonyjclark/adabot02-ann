@@ -3,30 +3,55 @@
 import cma
 from cma.fitness_transformations import EvalParallel
 
-import subprocess as sp
 import numpy as np
 
-NI = 5
-NH = 3
-NO = 3
-N = (NI + 1) * NH + (NH + 1) * NO
+import subprocess as sp
+from math import pi
+import sys
+
+
 MAXVAL = 10
 SIGMA = 2
 
 
-def ugv_ann(g):
+def genome_to_args(g):
 
     # a + (b-a) × x/10
-    # a = 0, b = 2
-    g_act = int(round(g[0] / MAXVAL * 2))
-    nn_shape = '{} {} {} {} '.format(NI, NH, NO, g_act)
 
-    # a + (b-a) × x/10
-    # a = -10, b = 10
-    weights = g[1:] / MAXVAL * 20 - 10
+    # TIME_STOP, num_obstacles, obstacle_seed
+    args = ['30.0', '0', '0']
 
-    cmd = ['../bin/ugv_ann', nn_shape + ' '.join(str(w) for w in weights)]
-    timeout = 15
+    # wheel_base 10cm, 8cm to 16cm
+    args.append(str(0.08 + (0.16 - 0.08) * g[0] / 10))
+
+    # track_width 12cm, 8cm to 16cm
+    args.append(str(0.08 + (0.16 - 0.08) * g[1] / 10))
+
+    # wheel_radius 2.5cm, 2cm to 3cm
+    args.append(str(0.02 + (0.03 - 0.02) * g[2] / 10))
+
+    # weg_count 3, 0 to 7
+    args.append(str(int(round(7 * g[3] / 10))))
+
+    # NI, NO, ACT
+    NI = 3
+    NO = 3
+    args.append(str(NI))
+    args.append(str(NO))
+    args.append(str(int(round(g[4] / MAXVAL * 2))))
+
+    # weights
+    N = (NI + 1) * NO
+    for i in range(5, 5 + N):
+        args.append(str(g[i]/10))
+
+    return ugv_fsm(' '.join(args))
+
+
+def ugv_fsm(args):
+
+    cmd = ['../bin/ugv_fsm', args]
+    timeout = 40
 
     for attempt in range(3):
         try:
@@ -66,25 +91,82 @@ def ugv_ann(g):
     return fitness
 
 
-if __name__ == '__main__':
+def evolve(initial_genome):
     cma_options = {
         'seed': 0,
         'bounds': [0, MAXVAL],
         # 'maxiter': 100,
         'timeout': 1 * 60**2,
         # 'verb_plot': ...,
-        'integer_variables': [0],
+        'integer_variables': [3, 4],
         # 'verb_log': ...
     }
 
-    initial_genome = np.random.uniform(0, MAXVAL, N + 1)
-    # res = cma.fmin(ugv_ann, initial_genome, SIGMA, cma_options)
+    # N = 15
+    # initial_genome = np.random.uniform(0, MAXVAL, N)
 
     es = cma.CMAEvolutionStrategy(initial_genome, SIGMA, cma_options)
 
     with EvalParallel(es.popsize + 1) as eval_all:
         while not es.stop():
             X = es.ask()
-            es.tell(X, eval_all(ugv_ann, X))
+            es.tell(X, eval_all(genome_to_args, X))
             es.disp()
-            # es.logger.add()  # doctest:+ELLIPSIS
+            # es.logger.add()
+
+
+if __name__ == '__main__':
+
+    if len(sys.argv) > 1:
+        print(ugv_fsm(sys.argv[1]))
+    else:
+        initial_genome = np.random.uniform(0, MAXVAL, 17)
+        evolve(initial_genome)
+
+
+"""
+30.0 0.1 0.12 0.025 3 0.4 -10 -10 0.18 -0.18 10 -10 0.09 -10 10 -0.09
+-3.0743666666666667
+TIME_STOP 30
+wheel_base 0.1
+track_width 0.12
+wheel_radius 0.025
+weg_count 3
+weg_extension_percent 0.4
+forward_left -10
+forward_right -10
+forward_to_left_lo 0.18
+forward_to_right_hi -0.18
+left_left 10
+left_right -10
+left_to_forward_hi 0.09
+right_left -10
+right_right 10
+right_to_forward_lo -0.09
+Targets reached : 2
+Dist to next    : 1.38845
+Time remaining  : 0
+
+
+30.0 0.1 0.12 0.025 3 0.4 -10 -10 0.18849555921538758 -0.1884955592153874 10.0 -10.0 0.09424777960769379 -10.0 10.0 -0.0942477796076937
+-1.4723493333333333
+TIME_STOP 30
+wheel_base 0.1
+track_width 0.12
+wheel_radius 0.025
+weg_count 3
+weg_extension_percent 0.4
+forward_left -10
+forward_right -10
+forward_to_left_lo 0.188496
+forward_to_right_hi -0.188496
+left_left 10
+left_right -10
+left_to_forward_hi 0.0942478
+right_left -10
+right_right 10
+right_to_forward_lo -0.0942478
+Targets reached : 1
+Dist to next    : 0.791476
+Time remaining  : 0
+"""

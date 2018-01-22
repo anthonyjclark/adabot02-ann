@@ -279,8 +279,7 @@ int main(int argc, char const *argv[])
 
     // Weg parameters
     size_t weg_count;
-    double weg_extension_percent;
-    iss >> weg_count >> weg_extension_percent;
+    iss >> weg_count;
     // cerr << "\nweg_count " << weg_count << "\nweg_extension_percent " << weg_extension_percent;
 
     constexpr double weg_radius = 0.25_cm;
@@ -299,8 +298,8 @@ int main(int argc, char const *argv[])
         weights(w_idx++) = val;
     }
 
-    if (NI != 3 || NO != 3) {
-        cerr << "Invalid number of inputs or outputs." << endl;
+    if (NI != 3 || NO != 3 || w_idx != ((NI + 1)*NO)) {
+        cerr << "Invalid number of inputs, outputs, or weights." << endl;
         return 1;
     }
 

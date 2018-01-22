@@ -50,7 +50,7 @@ def genome_to_args(g):
 
 def ugv_bnn(args):
 
-    cmd = ['../bin/ugv_bnn', args]
+    cmd = ['./ugv_bnn', args]
     timeout = 40
 
     for attempt in range(3):

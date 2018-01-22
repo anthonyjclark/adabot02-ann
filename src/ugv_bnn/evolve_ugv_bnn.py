@@ -45,12 +45,12 @@ def genome_to_args(g):
     for i in range(5, 5 + N):
         args.append(str(g[i]/10))
 
-    return ugv_fsm(' '.join(args))
+    return ugv_bnn(' '.join(args))
 
 
-def ugv_fsm(args):
+def ugv_bnn(args):
 
-    cmd = ['../bin/ugv_fsm', args]
+    cmd = ['../bin/ugv_bnn', args]
     timeout = 40
 
     for attempt in range(3):
@@ -118,7 +118,7 @@ def evolve(initial_genome):
 if __name__ == '__main__':
 
     if len(sys.argv) > 1:
-        print(ugv_fsm(sys.argv[1]))
+        print(ugv_bnn(sys.argv[1]))
     else:
         initial_genome = np.random.uniform(0, MAXVAL, 17)
         evolve(initial_genome)

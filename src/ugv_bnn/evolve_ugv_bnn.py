@@ -38,7 +38,15 @@ def range_transform(x, a, b, c, d):
 
 
 def round_to_n_sigs(x, n):
-    return round(x, -int(floor(log10(abs(x)))) + (n - 1))
+    if x == 0:
+        return 0
+    else:
+        try:
+            round(x, -int(floor(log10(abs(x)))) + (n - 1))
+        except ValueError as e:
+            print(x, n)
+            raise e
+        # return round(x, -int(floor(log10(abs(x)))) + (n - 1))
 
 
 

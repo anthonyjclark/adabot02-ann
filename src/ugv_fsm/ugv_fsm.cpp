@@ -683,8 +683,10 @@ int main(int argc, char const *argv[])
 
             // Speed scaled by weg extension
             double w_speed_scale_factor = 1.0 - (w / 2.0);
-            left_speed = fsm[state].left_speed * w_speed_scale_factor;
-            right_speed = fsm[state].right_speed * w_speed_scale_factor;
+            const double max_rads = MAX_ABS_RADS * w_speed_scale_factor;
+
+            left_speed = min(max_rads, fsm[state].left_speed);
+            right_speed = min(max_rads, fsm[state].right_speed);
 
             // cout << world->getTime()
             //      << " " << weg_extension

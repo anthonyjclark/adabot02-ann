@@ -625,14 +625,10 @@ int main(int argc, char const *argv[])
 
             // Speed scaled by weg extension
             double w_speed_scale_factor = 1.0 - (w / 2.0);
-            left_speed = (l * (max_s - min_s) + min_s) * w_speed_scale_factor;
-            right_speed = (r * (max_s - min_s) + min_s) * w_speed_scale_factor;
+            const double max_rads = MAX_ABS_RADS * w_speed_scale_factor;
 
-// left_speed = -10;
-// right_speed = -10;
-// weg_extension = 0;
-
-// if (world->getTime() > 3.3 && world->getTime() < 6.6) right_speed = 10;
+            left_speed = min(max_rads, (l * (max_s - min_s) + min_s));
+            right_speed = min(max_rads, (r * (max_s - min_s) + min_s));
 
             // cout << world->getTime()
             //      << " " << left_speed

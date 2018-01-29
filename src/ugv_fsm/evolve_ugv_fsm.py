@@ -3,18 +3,10 @@
 import cma
 from cma.fitness_transformations import EvalParallel
 
-import numpy as np
-
+import random
 import subprocess as sp
 from math import pi, floor, log10
 import argparse
-
-
-MAX_G_VAL = 10
-SIGMA = 2
-SIM_MAX_DURATION = 30
-NUM_OBSTACLES = 0
-OBSTACLE_SEED = 0
 
 
 
@@ -118,6 +110,7 @@ def ugv_sim(args, print_command=False):
 
 
 def evolve(initial_genome, seed):
+    random.seed(seed)
     cma_options = {
         'seed': seed,
         'bounds': [0, MAX_G_VAL],
@@ -143,7 +136,15 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Launch an experiment.')
     argparser.add_argument('--seed', type=int, help='Seed for the random number generator.')
     argparser.add_argument('--args', type=str, help='A UGV args string to evaluate.')
+    argparser.add_argument('--obst', type=int, help='Number of obstacles to generate.')
     prog_args = argparser.parse_args()
+
+    MAX_G_VAL = 10
+    SIGMA = 2
+
+    SIM_MAX_DURATION = 30
+    NUM_OBSTACLES = prog_args.obst if prog_args.obst else 0
+    OBSTACLE_SEED = prog_args.seed if prog_args.seed else 0
 
     default_genome = [range_transform(m['default'], m['minval'], m['maxval'], 0, MAX_G_VAL)
         for m in genome_to_args_map]

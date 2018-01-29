@@ -6,54 +6,78 @@ from cma.fitness_transformations import EvalParallel
 import numpy as np
 
 import subprocess as sp
-from math import pi
-import sys
+from math import pi, floor, log10
+import argparse
 
 
-MAXVAL = 10
+MAX_G_VAL = 10
 SIGMA = 2
+SIM_MAX_DURATION = 30
+NUM_OBSTACLES = 0
+OBSTACLE_SEED = 0
 
-SIM_TIME = 30
 
 
-def genome_to_args(g):
+# Names are just for documentation
+genome_to_args_map = [
+    {'name': 'wheel_base'   , 'minval':  0.08 , 'maxval': 0.16 , 'T': float},
+    {'name': 'track_width'  , 'minval':  0.08 , 'maxval': 0.16 , 'T': float},
+    {'name': 'wheel_radius' , 'minval':  0.02 , 'maxval': 0.03 , 'T': float},
+    {'name': 'weg_count'    , 'minval':  0    , 'maxval': 7.99 , 'T': int  },
+    {'name': 'ACT'          , 'minval':  0    , 'maxval': 2.99 , 'T': int  },
+]
+genome_weights_to_args_maps = {
+     'name': 'weight'       , 'minval': -4    , 'maxval': 4    , 'T': float}
 
-    # a + (b-a) × x/10
+
+
+def range_transform(x, a, b, c, d):
+    # [a; b] --> [b; c]
+    return (x - a) * (d - c) / (b - a) + c
+
+
+
+def round_to_n_sigs(x, n):
+    return round(x, -int(floor(log10(abs(x)))) + (n - 1))
+
+
+
+def genome_to_args(genome):
 
     # TIME_STOP, num_obstacles, obstacle_seed
-    args = [str(SIM_TIME), '0', '0']
+    args = [str(SIM_MAX_DURATION), str(NUM_OBSTACLES), str(OBSTACLE_SEED)]
 
-    # wheel_base 10cm, 8cm to 16cm
-    args.append(str(0.08 + (0.16 - 0.08) * g[0] / MAXVAL))
+    for m, gval in zip(genome_to_args_map, genome):
+        argval = m['T'](range_transform(gval, 0, MAX_G_VAL, m['minval'], m['maxval']))
+        args.append(str(round_to_n_sigs(argval, 4)))
 
-    # track_width 12cm, 8cm to 16cm
-    args.append(str(0.08 + (0.16 - 0.08) * g[1] / MAXVAL))
-
-    # wheel_radius 2.5cm, 2cm to 3cm
-    args.append(str(0.02 + (0.03 - 0.02) * g[2] / MAXVAL))
-
-    # weg_count 3, 0 to 7
-    args.append(str(int(round(7 * g[3] / MAXVAL))))
-
-    # NI, NO, ACT
+    # NI, NO
     NI = 3
     NO = 3
-    args.append(str(NI))
-    args.append(str(NO))
-    args.append(str(int(round(g[4] / MAXVAL * 2))))
+    N = (NI + 1) * NO
 
     # weights
-    N = (NI + 1) * NO
-    for i in range(5, 5 + N):
-        args.append(str(-4 + 8 * g[i] / MAXVAL))
+    m = genome_weights_to_args_maps
+    for gval in g[len(genome_to_args):]:
+        argval = m['T'](genome_transform(gval, m['minval'], m['maxval'], MAXVAL))
+        args.append(str(argval))
 
-    return ugv_bnn(' '.join(args))
+    return ' '.join(args)
 
 
-def ugv_bnn(args):
 
-    cmd = ['./ugv_bnn', args]
-    timeout = SIM_TIME * 1.2
+def ugv_fitness_fcn(genome):
+    return ugv_sim(genome_to_args(genome))
+
+
+
+def ugv_sim(args, print_command=False):
+
+    cmd = ['../bin/ugv_bnn', args]
+    timeout = SIM_MAX_DURATION * 1.2
+
+    if print_command:
+        print(cmd)
 
     for attempt in range(3):
         try:
@@ -72,7 +96,7 @@ def ugv_bnn(args):
             fit2 = min(dist_to_next, 1.5) / 1.5
 
             # Higher is better
-            fit3 = time_remaining / SIM_TIME
+            fit3 = time_remaining / SIM_MAX_DURATION
 
             fitness = -fit1 + fit2 - fit3
 
@@ -93,10 +117,10 @@ def ugv_bnn(args):
     return fitness
 
 
-def evolve(initial_genome):
+def evolve(initial_genome, seed):
     cma_options = {
-        'seed': 0,
-        'bounds': [0, MAXVAL],
+        'seed': seed,
+        'bounds': [0, MAX_G_VAL],
         # 'maxiter': 100,
         'timeout': 2 * 60**2,
         # 'verb_plot': ...,
@@ -109,15 +133,24 @@ def evolve(initial_genome):
     with EvalParallel() as eval_all:
         while not es.stop():
             X = es.ask()
-            es.tell(X, eval_all(genome_to_args, X))
+            es.tell(X, eval_all(ugv_fitness_fcn, X))
             es.disp()
             es.logger.add()
 
 
 if __name__ == '__main__':
 
-    if len(sys.argv) > 1:
-        print(ugv_bnn(sys.argv[1]))
+    argparser = argparse.ArgumentParser(description='Launch an experiment.')
+    argparser.add_argument('--seed', type=int, help='Seed for the random number generator.')
+    argparser.add_argument('--args', type=str, help='A UGV args string to evaluate.')
+    prog_args = argparser.parse_args()
+
+    default_genome = [range_transform(m['default'], m['minval'], m['maxval'], 0, MAX_G_VAL)
+        for m in genome_to_args_map]
+
+    if prog_args.seed != None:
+        evolve(default_genome, prog_args.seed)
+    elif prog_args.args != None:
+        print('Fitness', ugv_sim(prog_args.args, print_command=True))
     else:
-        initial_genome = np.random.uniform(0, MAXVAL, 17)
-        evolve(initial_genome)
+        print('Fitness', ugv_sim(genome_to_args(default_genome), print_command=True))

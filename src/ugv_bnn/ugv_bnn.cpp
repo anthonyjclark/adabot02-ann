@@ -123,7 +123,7 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
 
         // Move the weg into place
         Isometry3d tf_weg{Isometry3d::Identity()};
-        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 2.0 - wp.weg_radius / 2.0, 0);
+        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 2.0 - wp.weg_radius, 0);
         auto vector_transform = AngleAxisd(2_pi * weg_idx / wp.num_wegs, Vector3d(0, 0, 1));
         tf_weg.translation() = vector_transform * vector_to_point;
 
@@ -134,7 +134,6 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
         weg_pair.second->createShapeNodeWith<CollisionAspect, DynamicsAspect>(weg_shape);
         weg_pair.first->setActuatorType(Joint::VELOCITY);
 
-        // weg_pair.first->setAxis(Vector3d{0, 1, 0});
         weg_pair.first->setAxis(vector_transform * vector_to_point);
     }
 
@@ -251,19 +250,28 @@ int main(int argc, char const *argv[])
     // Simulation parameters
     double TIME_STOP;
     iss >> TIME_STOP;
-    // cerr << "TIME_STOP " << TIME_STOP;
+
+#ifdef VISUALIZE
+    cerr << "TIME_STOP " << TIME_STOP;
+#endif
 
     constexpr double TIME_STEP = 0.005;
 
     // Number of obstacles
     size_t num_obstacles, obstacle_seed;
     iss >> num_obstacles >> obstacle_seed;
-    // cerr << "\nnum_obstacles " << num_obstacles << "\nobstacle_seed " << obstacle_seed;
+
+#ifdef VISUALIZE
+    cerr << "\nnum_obstacles " << num_obstacles << "\nobstacle_seed " << obstacle_seed;
+#endif
 
     // Chassis parameters
     double wheel_base, track_width;
     iss >> wheel_base >> track_width;
-    // cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width ;
+
+#ifdef VISUALIZE
+    cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width;
+#endif
 
     constexpr double chassis_height = 3_cm;
     const string chassis_name{"chassis"};
@@ -272,7 +280,10 @@ int main(int argc, char const *argv[])
     // Wheel parameters
     double wheel_radius;
     iss >> wheel_radius;
-    // cerr << "\nwheel_radius " << wheel_radius;
+
+#ifdef VISUALIZE
+    cerr << "\nwheel_radius " << wheel_radius;
+#endif
 
     constexpr double wheel_thickness = 1.5_cm;
     const Vector3d wheel_dimensions{wheel_radius * 2, wheel_radius * 2, wheel_thickness};
@@ -280,15 +291,23 @@ int main(int argc, char const *argv[])
     // Weg parameters
     size_t weg_count;
     iss >> weg_count;
-    // cerr << "\nweg_count " << weg_count << "\nweg_extension_percent " << weg_extension_percent;
+
+#ifdef VISUALIZE
+    cerr << "\nweg_count " << weg_count;
+#endif
 
     constexpr double weg_radius = 0.25_cm;
 
 
     // Read BNN structure
-    long NI, NO, ACT;
-    iss >> NI >> NO >> ACT;
-    // cerr << "\nNI " << NI << "\nNO " << NO << "\nACT " << ACT << endl;
+    long NI = 3;
+    long NO = 3;
+    long ACT;
+    iss >> ACT;
+
+#ifdef VISUALIZE
+    cerr << "\nNI " << NI << "\nNO " << NO << "\nACT " << ACT << endl;
+#endif
 
     // Read weights
     double val;
@@ -297,6 +316,10 @@ int main(int argc, char const *argv[])
     while (iss >> val) {
         weights(w_idx++) = val;
     }
+
+#ifdef VISUALIZE
+    cerr << "\nweights " << weights << endl;
+#endif
 
     if (NI != 3 || NO != 3 || w_idx != ((NI + 1)*NO)) {
         cerr << "Invalid number of inputs, outputs, or weights." << endl;

@@ -122,7 +122,7 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
 
         // Move the weg into place
         Isometry3d tf_weg{Isometry3d::Identity()};
-        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 2.0 - wp.weg_radius, 0);
+        auto vector_to_point = Vector3d(0, wp.dimensions.y() / 2.0 - wp.weg_radius / 2.0, 0);
         auto vector_transform = AngleAxisd(2_pi * weg_idx / wp.num_wegs, Vector3d(0, 0, 1));
         tf_weg.translation() = vector_transform * vector_to_point;
 
@@ -141,7 +141,7 @@ auto add_wheel(SkeletonPtr skel, const WheelProperties & wp)
 }
 
 
-auto create_random_box(double ugv_density, size_t rseed)
+auto create_random_box(double ugv_density, size_t rseed=0)
 {
     static std::mt19937 reng(rseed);
 
@@ -249,28 +249,14 @@ int main(int argc, char const *argv[])
     // Simulation parameters
     double TIME_STOP;
     iss >> TIME_STOP;
-
-#ifdef VISUALIZE
     cerr << "TIME_STOP " << TIME_STOP;
-#endif
 
     constexpr double TIME_STEP = 0.005;
-
-    // Number of obstacles
-    size_t num_obstacles, obstacle_seed;
-    iss >> num_obstacles >> obstacle_seed;
-
-#ifdef VISUALIZE
-    cerr << "\nnum_obstacles " << num_obstacles << "\nobstacle_seed " << obstacle_seed;
-#endif
 
     // Chassis parameters
     double wheel_base, track_width;
     iss >> wheel_base >> track_width;
-
-#ifdef VISUALIZE
-    cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width;
-#endif
+    cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width ;
 
     constexpr double chassis_height = 3_cm;
     const string chassis_name{"chassis"};
@@ -279,77 +265,63 @@ int main(int argc, char const *argv[])
     // Wheel parameters
     double wheel_radius;
     iss >> wheel_radius;
-
-#ifdef VISUALIZE
     cerr << "\nwheel_radius " << wheel_radius;
-#endif
 
     constexpr double wheel_thickness = 1.5_cm;
     const Vector3d wheel_dimensions{wheel_radius * 2, wheel_radius * 2, wheel_thickness};
 
     // Weg parameters
     size_t weg_count;
-    double weg_extension_slope, weg_extension_intercept;
-    iss >> weg_count >> weg_extension_slope >> weg_extension_intercept;
-
-#ifdef VISUALIZE
-    cerr << "\nweg_count " << weg_count
-         << "\nweg_extension_slope " << weg_extension_slope
-         << "\nweg_extension_intercept " << weg_extension_intercept;
-#endif
+    double weg_extension_percent;
+    iss >> weg_count >> weg_extension_percent;
+    cerr << "\nweg_count " << weg_count << "\nweg_extension_percent " << weg_extension_percent;
 
     constexpr double weg_radius = 0.25_cm;
 
     // FSM parameters
-    double forward_speed_scale;
+    double forward_left, forward_right;
     double forward_to_left_lo;//, forward_to_left_hi;
     double /*forward_to_right_lo,*/ forward_to_right_hi;
 
-    iss >> forward_speed_scale
-        // >> forward_right
+    iss >> forward_left
+        >> forward_right
         >> forward_to_left_lo
         // >> forward_to_left_hi
         // >> forward_to_right_lo
         >> forward_to_right_hi;
 
-#ifdef VISUALIZE
-    cerr << "\nforward_speed_scale " << forward_speed_scale
-         // << "\nforward_right " << forward_right
+    cerr << "\nforward_left " << forward_left
+         << "\nforward_right " << forward_right
          << "\nforward_to_left_lo " << forward_to_left_lo * 180 / 3.145926
     //      << "\nforward_to_left_hi " << forward_to_left_hi
     //      << "\nforward_to_right_lo " << forward_to_right_lo
          << "\nforward_to_right_hi " << forward_to_right_hi * 180 / 3.145926;
-#endif
 
-    double left_left_scale, left_right_scale;
+    double left_left, left_right;
     double /*left_to_forward_lo,*/ left_to_forward_hi;
 
-    iss >> left_left_scale
-        >> left_right_scale
+    iss >> left_left
+        >> left_right
         // >> left_to_forward_lo
         >> left_to_forward_hi;
 
-#ifdef VISUALIZE
-    cerr << "\nleft_left " << left_left_scale
-         << "\nleft_right " << left_right_scale
+    cerr << "\nleft_left " << left_left
+         << "\nleft_right " << left_right
     //      << "\nleft_to_forward_lo " << left_to_forward_lo
          << "\nleft_to_forward_hi " << left_to_forward_hi * 180 / 3.145926;
-#endif
 
-    double right_left_scale, right_right_scale;
+    double right_left, right_right;
     double right_to_forward_lo;//, right_to_forward_hi;
 
-    iss >> right_left_scale
-        >> right_right_scale
+    iss >> right_left
+        >> right_right
         >> right_to_forward_lo;
         // >> right_to_forward_hi;
 
-#ifdef VISUALIZE
-    cerr << "\nright_left " << right_left_scale
-         << "\nright_right " << right_right_scale
+    cerr << "\nright_left " << right_left
+         << "\nright_right " << right_right
          << "\nright_to_forward_lo " << right_to_forward_lo * 180 / 3.145926 << endl;
     //      << "\nright_to_forward_hi " << right_to_forward_hi << endl;
-#endif
 
 #ifdef VISUALIZE
 
@@ -479,12 +451,12 @@ int main(int argc, char const *argv[])
     auto collisionEngine = world->getConstraintSolver()->getCollisionDetector();
     auto collisionGroup = world->getConstraintSolver()->getCollisionGroup();
 
-    for (size_t obs_idx = 0; obs_idx < num_obstacles; ++obs_idx) {
+    for (size_t obs_idx = 0; obs_idx < 30; ++obs_idx) {
         SkeletonPtr skel;
         Vector3d dims;
         std::string name;
 
-        std::tie(skel, dims, name) = create_random_box(material_density, obstacle_seed);
+        std::tie(skel, dims, name) = create_random_box(material_density);
 
         // Only add object if there is not collision
         auto newGroup = collisionEngine->createCollisionGroup(skel.get());
@@ -552,27 +524,21 @@ int main(int argc, char const *argv[])
     //     {"right",   {"right",   -max_speed,  max_speed,       1,  -1,     1,      -1, -5_deg,  2_pi}},
     // }};
 
-    // 730 RPM --> 76.44542115 rad/s
-    constexpr double MAX_ABS_SPEED = 20;
-
     std::unordered_map<std::string, State> fsm{{
         {"forward", {"forward",
-            -MAX_ABS_SPEED * forward_speed_scale,
-            -MAX_ABS_SPEED * forward_speed_scale,
+            forward_left, forward_right,
             forward_to_left_lo, 2_pi,
             -2_pi, forward_to_right_hi,
             1, -1}
         },
         {"left",    {"left",
-            -MAX_ABS_SPEED * left_left_scale,
-            -MAX_ABS_SPEED * left_right_scale,
+            left_left, left_right,
             1, -1,
             1, -1,
             -2_pi, left_to_forward_hi}
         },
         {"right",   {"right",
-            -MAX_ABS_SPEED * right_left_scale,
-            -MAX_ABS_SPEED * right_right_scale,
+            right_left, right_right,
             1, -1,
             1, -1,
             right_to_forward_lo, 2_pi}
@@ -590,6 +556,7 @@ int main(int argc, char const *argv[])
 
     double next_control_update_time = 0;
     constexpr double CONTROL_STEP = 0.1;
+    constexpr double MAX_ABS_SPEED = 10;
 
 
 #ifdef VISUALIZE
@@ -610,11 +577,7 @@ int main(int argc, char const *argv[])
 
     double left_speed = 0;
     double right_speed = 0;
-    double weg_extension = 0;
-
-    double angular_speed_error = 0;
-    double linear_speed_error = 0;
-    double alpha = 0.25;
+    double weg_extension = (wheel_radius - 1_cm) * weg_extension_percent;
 
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
@@ -646,30 +609,24 @@ int main(int argc, char const *argv[])
                 }
             }
 
-            double linear_speed = ugv->getBodyNode(chassis_name)->getLinearVelocity().norm();
-            double angular_speed = ugv->getBodyNode(chassis_name)->getAngularVelocity().y();
+            // auto chassis_linear_velocity = ugv->getBodyNode(chassis_name)->getCOMLinearVelocity();
+            // auto temp = ugv->getBodyNode(chassis_name)->getLinearVelocity();
 
-            // expected angular speed: w = (Vr - Vl) / l
-            double Vr = right_speed * wheel_radius;
-            double Vl = left_speed * wheel_radius;
+            // cout << chassis_linear_velocity.x() << " " << chassis_linear_velocity.z()
+            //      << " " << temp.x() << " " << temp.y() << endl;
 
-            double expected_angular_speed = -(Vr - Vl) / track_width;
-            double expected_linear_speed = -(Vr + Vl) / 2.0;
 
-            double angular_error = abs(angular_speed - expected_angular_speed);
-            double linear_error = abs(linear_speed - expected_linear_speed);
+            // weg_extension = (wheel_radius - 1_cm) * weg_extension_percent * 0;
 
-            angular_speed_error = (alpha * angular_error) + (1.0 - alpha) * angular_speed_error;
-            linear_speed_error = (alpha * linear_error) + (1.0 - alpha) * linear_speed_error;
+            double scaled_max = MAX_ABS_SPEED;
+            right_speed = min(scaled_max, max(-scaled_max, fsm[state].right_speed));
+            left_speed = min(scaled_max, max(-scaled_max, fsm[state].left_speed));
 
             // right_speed = -10;
             // left_speed = -5;
-            left_speed = fsm[state].left_speed;
-            right_speed = fsm[state].right_speed;
-            weg_extension = 0;
         }
 
-        // cout << world->getTime() << " " << angle << " " << state << endl;
+            // cout << world->getTime() << " " << angle << " " << state << endl;
 
         ugv->setCommand(wheel_idxs.at(0), right_speed);
         ugv->setCommand(wheel_idxs.at(1), left_speed);
@@ -705,9 +662,6 @@ int main(int argc, char const *argv[])
 #endif
 
     }
-
-    // zero target_dist if all 4 targets have been reached
-    target_dist = target_idx >= targets.size() ? 0 : target_dist;
 
 #ifdef VISUALIZE
     rl.log_data_["duration"] = (rl.log_data_["frames"].size() - 1) * VIS_STEP;

@@ -61,3 +61,5 @@ Temporary Items
 *.app
 
 bin/
+generated_files/
+pdfs/

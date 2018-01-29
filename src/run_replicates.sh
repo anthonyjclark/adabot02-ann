@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 
+NUM_OBSTACLES="0"
 
-if [[ "$1" != "fsm" && "$1" != "bnn" ]]; then
-    echo "Valid experiments: fsm and bnn"
-    exit 0
+if [[ "$1" == "fsm" || "$1" == "bnn" ]]; then
+    BIN_NAME="$1"
+else
+    echo "First argument (valid experiments): fsm|bnn" >&2; exit 1;
+fi
+
+if [[ -n "$2" && $2 =~ ^[0-9]+$ ]]; then
+    NUM_OBSTACLES="$2"
+else
+    echo "Second argument (number of obstacles) must be an integer" >&2; exit 1;
 fi
 
 function run_and_time () {

@@ -16,7 +16,7 @@ fi
 
 function run_and_time () {
     echo $@
-    # { $@ &> run_log.txt ; } &> run_time.txt
+    { $@ &> run_log.txt ; } &> run_time.txt
 }
 
 

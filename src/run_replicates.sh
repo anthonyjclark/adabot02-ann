@@ -16,7 +16,7 @@ fi
 
 function run_and_time () {
     echo $@
-    { $@ &> run_log.txt ; } &> run_time.txt
+    # { $@ &> run_log.txt ; } &> run_time.txt
 }
 
 
@@ -29,7 +29,7 @@ for (( i = 1; i <= $NUM_REPS; i++ )); do
     mkdir $repname
     cd $repname
 
-    run_and_time "../bin/evolve_ugv_""$1"".py --seed $i"
+    run_and_time "../bin/evolve_ugv_""$BIN_NAME"".py --seed $i --obst $NUM_OBSTACLES"
 
     cd ..
 

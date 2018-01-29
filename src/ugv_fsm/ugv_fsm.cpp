@@ -685,6 +685,12 @@ int main(int argc, char const *argv[])
             double w_speed_scale_factor = 1.0 - (w / 2.0);
             left_speed = fsm[state].left_speed * w_speed_scale_factor;
             right_speed = fsm[state].right_speed * w_speed_scale_factor;
+
+            // cout << world->getTime()
+            //      << " " << weg_extension
+            //      << " " << left_speed
+            //      << " " << right_speed << endl;
+
         }
 
         // cout << world->getTime() << " " << angle << " " << state << endl;

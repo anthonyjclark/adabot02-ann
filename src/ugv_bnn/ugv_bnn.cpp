@@ -517,7 +517,7 @@ int main(int argc, char const *argv[])
     constexpr double CONTROL_STEP = 0.1;
 
     // 730 RPM --> 76.44542115 rad/s
-    constexpr double MAX_ABS_SPEED = 30;
+    constexpr double MAX_ABS_RADS = 20;
 
 
 #ifdef VISUALIZE
@@ -588,6 +588,12 @@ int main(int argc, char const *argv[])
             angular_speed_error = (alpha * angular_error) + (1.0 - alpha) * angular_speed_error;
             linear_speed_error = (alpha * linear_error) + (1.0 - alpha) * linear_speed_error;
 
+            const double max_abs_linear_speed = MAX_ABS_RADS * wheel_radius;
+            const double max_abs_angular_speed = 2 * max_abs_linear_speed / track_width;
+
+            double angular_speed_error_scaled = angular_speed_error / max_abs_angular_speed;
+            double linear_speed_error_scaled = linear_speed_error / max_abs_linear_speed;
+
             // cout << world->getTime()
             //      << "," << linear_speed
             //      << "," << expected_linear_speed
@@ -597,8 +603,8 @@ int main(int argc, char const *argv[])
             //      << "," << angular_speed_error << endl;
 
             nn_input(0) = angle;
-            nn_input(1) = angular_speed_error / 10;
-            nn_input(2) = linear_speed_error;
+            nn_input(1) = angular_speed_error_scaled;
+            nn_input(2) = linear_speed_error_scaled;
 
             Eigen::MatrixXd nn_output = bnn.activate(nn_input);
             Eigen::MatrixXd nn_output_clamped = nn_output.array().min(1).max(0);
@@ -608,8 +614,8 @@ int main(int argc, char const *argv[])
             double w = nn_output_clamped(2);
 
             const double max_w = wheel_radius - 1_cm;
-            constexpr double min_s = -MAX_ABS_SPEED;
-            constexpr double max_s = MAX_ABS_SPEED;
+            constexpr double min_s = -MAX_ABS_RADS;
+            constexpr double max_s = MAX_ABS_RADS;
 
             weg_extension = w * max_w;
 

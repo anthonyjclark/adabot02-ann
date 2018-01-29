@@ -553,26 +553,26 @@ int main(int argc, char const *argv[])
     // }};
 
     // 730 RPM --> 76.44542115 rad/s
-    constexpr double MAX_ABS_SPEED = 20;
+    constexpr double MAX_ABS_RADS = 20;
 
     std::unordered_map<std::string, State> fsm{{
         {"forward", {"forward",
-            -MAX_ABS_SPEED * forward_speed_scale,
-            -MAX_ABS_SPEED * forward_speed_scale,
+            -MAX_ABS_RADS * forward_speed_scale,
+            -MAX_ABS_RADS * forward_speed_scale,
             forward_to_left_lo, 2_pi,
             -2_pi, forward_to_right_hi,
             1, -1}
         },
         {"left",    {"left",
-            -MAX_ABS_SPEED * left_left_scale,
-            -MAX_ABS_SPEED * left_right_scale,
+            -MAX_ABS_RADS * left_left_scale,
+            -MAX_ABS_RADS * left_right_scale,
             1, -1,
             1, -1,
             -2_pi, left_to_forward_hi}
         },
         {"right",   {"right",
-            -MAX_ABS_SPEED * right_left_scale,
-            -MAX_ABS_SPEED * right_right_scale,
+            -MAX_ABS_RADS * right_left_scale,
+            -MAX_ABS_RADS * right_right_scale,
             1, -1,
             1, -1,
             right_to_forward_lo, 2_pi}
@@ -606,7 +606,9 @@ int main(int argc, char const *argv[])
 
     size_t target_idx = 0;
     double target_dist = 0.0;
+#ifdef VISUALIZE
     bool update_target = true;
+#endif
 
     double left_speed = 0;
     double right_speed = 0;
@@ -640,7 +642,9 @@ int main(int argc, char const *argv[])
             target_dist = (chassis_pos - targets[target_idx]).norm();
 
             if (target_dist < 8_cm) {
+#ifdef VISUALIZE
                 update_target = true;
+#endif
                 if (++target_idx >= targets.size()) {
                     break;
                 }
@@ -662,11 +666,25 @@ int main(int argc, char const *argv[])
             angular_speed_error = (alpha * angular_error) + (1.0 - alpha) * angular_speed_error;
             linear_speed_error = (alpha * linear_error) + (1.0 - alpha) * linear_speed_error;
 
-            // right_speed = -10;
-            // left_speed = -5;
-            left_speed = fsm[state].left_speed;
-            right_speed = fsm[state].right_speed;
-            weg_extension = 0;
+            const double max_abs_linear_speed = MAX_ABS_RADS * wheel_radius;
+            const double max_abs_angular_speed = 2 * max_abs_linear_speed / track_width;
+
+            double angular_speed_error_scaled = angular_speed_error / max_abs_angular_speed;
+            double linear_speed_error_scaled = linear_speed_error / max_abs_linear_speed;
+
+            double w_angular = weg_extension_slope * abs(angular_speed_error_scaled) + weg_extension_intercept;
+            double w_linear = weg_extension_slope * abs(linear_speed_error_scaled) + weg_extension_intercept;
+            double w = max(
+                min(1.0, max(0.0, w_angular)),
+                min(1.0, max(0.0, w_linear)));
+
+            const double max_w = wheel_radius - 1_cm;
+            weg_extension = w * max_w;
+
+            // Speed scaled by weg extension
+            double w_speed_scale_factor = 1.0 - (w / 2.0);
+            left_speed = fsm[state].left_speed * w_speed_scale_factor;
+            right_speed = fsm[state].right_speed * w_speed_scale_factor;
         }
 
         // cout << world->getTime() << " " << angle << " " << state << endl;

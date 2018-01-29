@@ -20,11 +20,11 @@ OBSTACLE_SEED = 0
 
 # Names are just for documentation
 genome_to_args_map = [
-    {'name': 'wheel_base'   , 'minval':  0.08 , 'maxval': 0.16 , 'T': float},
-    {'name': 'track_width'  , 'minval':  0.08 , 'maxval': 0.16 , 'T': float},
-    {'name': 'wheel_radius' , 'minval':  0.02 , 'maxval': 0.03 , 'T': float},
-    {'name': 'weg_count'    , 'minval':  0    , 'maxval': 7.99 , 'T': int  },
-    {'name': 'ACT'          , 'minval':  0    , 'maxval': 2.99 , 'T': int  },
+    {'name': 'wheel_base'             , 'default': 0.08, 'minval': 0.08, 'maxval': 0.16, 'T': float},
+    {'name': 'track_width'            , 'default': 0.12, 'minval': 0.08, 'maxval': 0.16, 'T': float},
+    {'name': 'wheel_radius'           , 'default': 0.02, 'minval': 0.02, 'maxval': 0.03, 'T': float},
+    {'name': 'weg_count'              , 'default': 3   , 'minval': 0   , 'maxval': 7.99, 'T': int  },
+    {'name': 'ACT'                    , 'default': 0   , 'minval': 0   , 'maxval': 2.99, 'T': int  },
 ]
 genome_weights_to_args_maps = {
      'name': 'weight'       , 'minval': -4    , 'maxval': 4    , 'T': float}
@@ -41,12 +41,7 @@ def round_to_n_sigs(x, n):
     if x == 0:
         return 0
     else:
-        try:
-            round(x, -int(floor(log10(abs(x)))) + (n - 1))
-        except ValueError as e:
-            print(x, n)
-            raise e
-        # return round(x, -int(floor(log10(abs(x)))) + (n - 1))
+        return round(x, -int(floor(log10(abs(x)))) + (n - 1))
 
 
 

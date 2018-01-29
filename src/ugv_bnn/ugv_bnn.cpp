@@ -534,7 +534,9 @@ int main(int argc, char const *argv[])
 
     size_t target_idx = 0;
     double target_dist = 0.0;
+#ifdef VISUALIZE
     bool update_target = true;
+#endif
 
     double left_speed = 0;
     double right_speed = 0;
@@ -566,7 +568,9 @@ int main(int argc, char const *argv[])
             target_dist = (chassis_pos - targets[target_idx]).norm();
 
             if (target_dist < 8_cm) {
+#ifdef VISUALIZE
                 update_target = true;
+#endif
                 if (++target_idx >= targets.size()) {
                     break;
                 }

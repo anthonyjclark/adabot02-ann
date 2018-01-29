@@ -3,8 +3,7 @@
 import cma
 from cma.fitness_transformations import EvalParallel
 
-import numpy as np
-
+import random
 import subprocess as sp
 from math import pi, floor, log10
 import argparse
@@ -16,7 +15,11 @@ SIM_MAX_DURATION = 30
 NUM_OBSTACLES = 0
 OBSTACLE_SEED = 0
 
-
+NI = 3
+NO = 3
+N = (NI + 1) * NO
+random.seed(0)
+default_weights = [random.uniform(-4, 4) for i in range(N)]
 
 # Names are just for documentation
 genome_to_args_map = [
@@ -26,8 +29,8 @@ genome_to_args_map = [
     {'name': 'weg_count'              , 'default': 3   , 'minval': 0   , 'maxval': 7.99, 'T': int  },
     {'name': 'ACT'                    , 'default': 0   , 'minval': 0   , 'maxval': 2.99, 'T': int  },
 ]
-genome_weights_to_args_maps = {
-     'name': 'weight'       , 'minval': -4    , 'maxval': 4    , 'T': float}
+genome_to_args_map.extend([{
+    'name': 'weight', 'default': f, 'minval': -4, 'maxval': 4, 'T': float} for f in default_weights])
 
 
 
@@ -53,17 +56,6 @@ def genome_to_args(genome):
     for m, gval in zip(genome_to_args_map, genome):
         argval = m['T'](range_transform(gval, 0, MAX_G_VAL, m['minval'], m['maxval']))
         args.append(str(round_to_n_sigs(argval, 4)))
-
-    # NI, NO
-    NI = 3
-    NO = 3
-    N = (NI + 1) * NO
-
-    # weights
-    m = genome_weights_to_args_maps
-    for gval in g[len(genome_to_args):]:
-        argval = m['T'](genome_transform(gval, m['minval'], m['maxval'], MAXVAL))
-        args.append(str(argval))
 
     return ' '.join(args)
 
@@ -121,6 +113,7 @@ def ugv_sim(args, print_command=False):
 
 
 def evolve(initial_genome, seed):
+    random.seed(seed)
     cma_options = {
         'seed': seed,
         'bounds': [0, MAX_G_VAL],

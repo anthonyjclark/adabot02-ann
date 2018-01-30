@@ -353,7 +353,7 @@ int main(int argc, char const *argv[])
 
 #ifdef VISUALIZE
 
-    constexpr double VIS_STEP = 1.0 / 10.0;
+    constexpr double VIS_STEP = 1.0 / 60.0;
     constexpr double VIS_SCALE = 10;
 
 

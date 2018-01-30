@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DYLIB_DIR="/usr/lib"
+DYLIB_DIR="/usr/lib:/usr/lib/x86_64-linux-gnu/"
 
 COMPILER="/usr/bin/c++"
 CPP_FLAGS="-std=c++14 -Wall -Wextra -O3"
@@ -10,7 +10,12 @@ BIN_DIR="bin"
 
 INC_DIRS="-isystem /usr/include/eigen3 -isystem $HOME/.local/include -isystem /usr/include/bullet"
 LIB_DIRS=""
-LIBS="/usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet"
+# LIBS="/usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet"
+LIBS="/usr/lib/libdart.so.6.3.0 \
+      -lassimp -lboost_system \
+      /usr/lib/x86_64-linux-gnu/libBulletCollision.so.2.83 \
+      /usr/lib/x86_64-linux-gnu/libLinearMath.so.2.83 \
+      /usr/lib/libdart-collision-bullet.so.6.3.0"
 
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DYLIB_DIR
 
@@ -71,6 +76,17 @@ case "$1" in
     run )
         run ${2%/}
         ;;
+
+    all )
+        rm -rf "$BIN_DIR"
+        mkdir -p $BIN_DIR
+
+        build "ugv_fsm"
+        build "ugv_fsm" "VISUALIZE"
+        build "ugv_bnn"
+        build "ugv_bnn" "VISUALIZE"
+        ;;
+
     brun )
         printf "*** Building ***\n"
         build ${2%/} "$3"

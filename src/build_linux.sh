@@ -76,6 +76,17 @@ case "$1" in
     run )
         run ${2%/}
         ;;
+
+    all )
+        rm -rf "$BIN_DIR"
+        mkdir -p $BIN_DIR
+
+        build "ugv_fsm"
+        build "ugv_fsm" "VISUALIZE"
+        build "ugv_bnn"
+        build "ugv_bnn" "VISUALIZE"
+        ;;
+
     brun )
         printf "*** Building ***\n"
         build ${2%/} "$3"

@@ -32,6 +32,8 @@ function compile () {
     erun $COMPILER $CPP_FLAGS $LD_FLAGS $INC_DIRS $LIB_DIRS $LIBS $1/$1.cpp -o $BIN_NAME $DEF
 }
 
+
+
 function build () {
     if [ -d "$1" ]; then
         compile "$1" "$2"
@@ -40,6 +42,8 @@ function build () {
     fi
 }
 
+
+
 function run () {
     if [ -f "$BIN_DIR"/"$1" ]; then
         "$BIN_DIR"/"$1"
@@ -47,6 +51,8 @@ function run () {
         printf "Error: could not find \"""$BIN_DIR"/"$1""\"\n"
     fi
 }
+
+
 
 # Create a bin directory
 mkdir -p $BIN_DIR

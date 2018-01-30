@@ -24,8 +24,10 @@ function erun () {
 function compile () {
     if [ -z "$2" ]; then
         DEF=""
+        BIN_NAME=$BIN_DIR/$1
     else
         DEF="-D$2"
+        BIN_NAME=$BIN_DIR/$1_vis
     fi
 
 
@@ -33,8 +35,8 @@ function compile () {
     # /usr/bin/c++ ugv_fsm.cpp.o -o ugv_fsm -rdynamic /usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet
 
 
-    erun $COMPILER $INC_DIRS $CPP_FLAGS -o $BIN_DIR/$1".cpp.o" -c $1/$1".cpp" $DEF
-    erun $COMPILER $BIN_DIR/$1".cpp.o" -o $BIN_DIR/$1 $LD_FLAGS $LIBS
+    erun $COMPILER $INC_DIRS $CPP_FLAGS -o $BIN_NAME".cpp.o" -c $1/$1".cpp" $DEF
+    erun $COMPILER $BIN_NAME".cpp.o" -o $BIN_NAME $LD_FLAGS $LIBS
 }
 
 function build () {

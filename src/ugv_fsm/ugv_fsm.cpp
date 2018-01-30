@@ -619,8 +619,8 @@ int main(int argc, char const *argv[])
     double alpha = 0.25;
 
 #ifdef VISUALIZE
-    cout << "time angle_scaled angle_scaled angular_speed_error_scaled linear_speed_error_scaled"
-            "left_speed right_speed weg_extension target_idx x y z";
+    cout << "time angle_scaled angular_speed_error_scaled linear_speed_error_scaled"
+            " left_speed right_speed weg_extension target_idx x y z";
     cout << " state" << endl;
 #endif
 
@@ -691,8 +691,8 @@ int main(int argc, char const *argv[])
             double w_speed_scale_factor = 1.0 - (w / 2.0);
             const double max_rads = MAX_ABS_RADS * w_speed_scale_factor;
 
-            left_speed = min(max_rads, fsm[state].left_speed);
-            right_speed = min(max_rads, fsm[state].right_speed);
+            left_speed = max(-max_rads, min(max_rads, fsm[state].left_speed));
+            right_speed = max(-max_rads, min(max_rads, fsm[state].right_speed));
 
 #ifdef VISUALIZE
             double angle_scaled = (angle + 1_pi) / 2_pi;

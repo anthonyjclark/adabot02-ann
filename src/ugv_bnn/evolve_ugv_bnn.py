@@ -30,12 +30,6 @@ NO = 3
 N = (NI + 1) * NO
 random.seed(0)
 default_weights = [random.uniform(-4, 4) for i in range(N)]
-# default_weights = [range_transform(x, 0, 10, -4, 4) for x in [
-#     8.13116120247,3.4693241097,4.69875155704,4.43595619008,
-#     1.88799568627,5.11755726116,1.83902776765,4.49898107155,
-#     9.62081494357,6.25173827373,3.71849019629,6.62964143603
-# ]]
-
 
 
 # Names are just for documentation
@@ -48,7 +42,6 @@ genome_to_args_map = [
 ]
 genome_to_args_map.extend([{
     'name': 'weight', 'default': f, 'minval': -4, 'maxval': 4, 'T': float} for f in default_weights])
-
 
 
 def genome_to_args(genome):
@@ -121,7 +114,7 @@ def evolve(initial_genome, seed):
         'seed': seed,
         'bounds': [0, MAX_G_VAL],
         # 'maxiter': 100,
-        'timeout': 2 * 60**2,
+        'timeout': 1 * 60**2,
         # 'verb_plot': ...,
         'integer_variables': [3, 4],
         # 'verb_log': ...
@@ -143,6 +136,7 @@ if __name__ == '__main__':
     argparser.add_argument('--seed', type=int, help='Seed for the random number generator.')
     argparser.add_argument('--args', type=str, help='A UGV args string to evaluate.')
     argparser.add_argument('--obst', type=int, help='Number of obstacles to generate.')
+    argparser.add_argument('--genome', type=str, help='Evaluate the given genome.')
     prog_args = argparser.parse_args()
 
     MAX_G_VAL = 10
@@ -159,5 +153,8 @@ if __name__ == '__main__':
         evolve(default_genome, prog_args.seed)
     elif prog_args.args != None:
         print('Fitness', ugv_sim(prog_args.args, print_command=True))
+    elif prog_args.genome != None:
+        given_genome = [float(g) for g in prog_args.genome.split(' ')]
+        print('Fitness', ugv_sim(genome_to_args(given_genome), print_command=True))
     else:
         print('Fitness', ugv_sim(genome_to_args(default_genome), print_command=True))

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DYLIB_DIR="/usr/lib"
+DYLIB_DIR="/usr/lib:/usr/lib/x86_64-linux-gnu/"
 
 COMPILER="/usr/bin/c++"
 CPP_FLAGS="-std=c++14 -Wall -Wextra -O3"
@@ -10,7 +10,12 @@ BIN_DIR="bin"
 
 INC_DIRS="-isystem /usr/include/eigen3 -isystem $HOME/.local/include -isystem /usr/include/bullet"
 LIB_DIRS=""
-LIBS="/usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet"
+# LIBS="/usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet"
+LIBS="/usr/lib/libdart.so.6.3.0 \
+      -lassimp -lboost_system \
+      /usr/lib/x86_64-linux-gnu/libBulletCollision.so.2.83 \
+      /usr/lib/x86_64-linux-gnu/libLinearMath.so.2.83 \
+      /usr/lib/libdart-collision-bullet.so.6.3.0"
 
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DYLIB_DIR
 
@@ -24,8 +29,10 @@ function erun () {
 function compile () {
     if [ -z "$2" ]; then
         DEF=""
+        BIN_NAME=$BIN_DIR/$1
     else
         DEF="-D$2"
+        BIN_NAME=$BIN_DIR/$1_vis
     fi
 
 
@@ -33,8 +40,8 @@ function compile () {
     # /usr/bin/c++ ugv_fsm.cpp.o -o ugv_fsm -rdynamic /usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet
 
 
-    erun $COMPILER $INC_DIRS $CPP_FLAGS -o $BIN_DIR/$1".cpp.o" -c $1/$1".cpp" $DEF
-    erun $COMPILER $BIN_DIR/$1".cpp.o" -o $BIN_DIR/$1 $LD_FLAGS $LIBS
+    erun $COMPILER $INC_DIRS $CPP_FLAGS -o $BIN_NAME".cpp.o" -c $1/$1".cpp" $DEF
+    erun $COMPILER $BIN_NAME".cpp.o" -o $BIN_NAME $LD_FLAGS $LIBS
 }
 
 function build () {

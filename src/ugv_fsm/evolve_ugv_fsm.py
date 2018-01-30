@@ -10,6 +10,20 @@ import argparse
 
 
 
+def range_transform(x, a, b, c, d):
+    # [a; b] --> [b; c]
+    return (x - a) * (d - c) / (b - a) + c
+
+
+
+def round_to_n_sigs(x, n):
+    if x == 0:
+        return 0
+    else:
+        return round(x, -int(floor(log10(abs(x)))) + (n - 1))
+
+
+
 # Names are just for documentation
 genome_to_args_map = [
     {'name': 'wheel_base'             , 'default': 0.08, 'minval': 0.08, 'maxval': 0.16, 'T': float},
@@ -31,24 +45,10 @@ genome_to_args_map = [
 
 
 
-def range_transform(x, a, b, c, d):
-    # [a; b] --> [b; c]
-    return (x - a) * (d - c) / (b - a) + c
-
-
-
-def round_to_n_sigs(x, n):
-    if x == 0:
-        return 0
-    else:
-        return round(x, -int(floor(log10(abs(x)))) + (n - 1))
-
-
-
-def genome_to_args(genome):
+def genome_to_args(genome, trial_num=0):
 
     # TIME_STOP, num_obstacles, obstacle_seed
-    args = [str(SIM_MAX_DURATION), str(NUM_OBSTACLES), str(OBSTACLE_SEED)]
+    args = [str(SIM_MAX_DURATION), str(NUM_OBSTACLES), str(OBSTACLE_SEED + trial_num * 100)]
 
     for m, gval in zip(genome_to_args_map, genome):
         argval = m['T'](range_transform(gval, 0, MAX_G_VAL, m['minval'], m['maxval']))
@@ -59,7 +59,7 @@ def genome_to_args(genome):
 
 
 def ugv_fitness_fcn(genome):
-    return ugv_sim(genome_to_args(genome))
+    return sum(ugv_sim(genome_to_args(genome, tn)) for tn in range(NUM_EVALUATIONS)) / NUM_EVALUATIONS
 
 
 
@@ -135,8 +135,12 @@ if __name__ == '__main__':
 
     argparser = argparse.ArgumentParser(description='Launch an experiment.')
     argparser.add_argument('--seed', type=int, help='Seed for the random number generator.')
-    argparser.add_argument('--args', type=str, help='A UGV args string to evaluate.')
     argparser.add_argument('--obst', type=int, help='Number of obstacles to generate.')
+    argparser.add_argument('--evals', type=int, help='Number of evaluations to perform.')
+
+    argparser.add_argument('--args', type=str, help='A UGV args string to evaluate.')
+    argparser.add_argument('--genome', type=str, help='Evaluate the given genome.')
+
     prog_args = argparser.parse_args()
 
     MAX_G_VAL = 10
@@ -145,6 +149,7 @@ if __name__ == '__main__':
     SIM_MAX_DURATION = 30
     NUM_OBSTACLES = prog_args.obst if prog_args.obst else 0
     OBSTACLE_SEED = prog_args.seed if prog_args.seed else 0
+    NUM_EVALUATIONS = prog_args.evals if prog_args.evals else 1
 
     default_genome = [range_transform(m['default'], m['minval'], m['maxval'], 0, MAX_G_VAL)
         for m in genome_to_args_map]
@@ -153,5 +158,8 @@ if __name__ == '__main__':
         evolve(default_genome, prog_args.seed)
     elif prog_args.args != None:
         print('Fitness', ugv_sim(prog_args.args, print_command=True))
+    elif prog_args.genome != None:
+        given_genome = [float(g) for g in prog_args.genome.split(' ')]
+        print('Fitness', ugv_sim(genome_to_args(given_genome), print_command=True))
     else:
         print('Fitness', ugv_sim(genome_to_args(default_genome), print_command=True))

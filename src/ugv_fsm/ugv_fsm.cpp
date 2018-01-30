@@ -521,6 +521,9 @@ int main(int argc, char const *argv[])
     // Controllers
     //
 
+    // 730 RPM --> 76.44542115 rad/s
+    constexpr double MAX_ABS_RADS = 20;
+
     // The PD controller can be reused by all wegs
     PDController weg_pd{1, 0.1, TIME_STEP};
 
@@ -551,9 +554,6 @@ int main(int argc, char const *argv[])
     //     {"left",    {"left",     max_speed, -max_speed,       1,  -1,     1,      -1,  -2_pi, 5_deg}},
     //     {"right",   {"right",   -max_speed,  max_speed,       1,  -1,     1,      -1, -5_deg,  2_pi}},
     // }};
-
-    // 730 RPM --> 76.44542115 rad/s
-    constexpr double MAX_ABS_RADS = 20;
 
     std::unordered_map<std::string, State> fsm{{
         {"forward", {"forward",
@@ -617,6 +617,12 @@ int main(int argc, char const *argv[])
     double angular_speed_error = 0;
     double linear_speed_error = 0;
     double alpha = 0.25;
+
+#ifdef VISUALIZE
+    cout << "time angle_scaled angle_scaled angular_speed_error_scaled linear_speed_error_scaled"
+            "left_speed right_speed weg_extension target_idx x y z";
+    cout << " state" << endl;
+#endif
 
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
@@ -688,14 +694,23 @@ int main(int argc, char const *argv[])
             left_speed = min(max_rads, fsm[state].left_speed);
             right_speed = min(max_rads, fsm[state].right_speed);
 
-            // cout << world->getTime()
-            //      << " " << weg_extension
-            //      << " " << left_speed
-            //      << " " << right_speed << endl;
-
+#ifdef VISUALIZE
+            double angle_scaled = (angle + 1_pi) / 2_pi;
+            cout << world->getTime()
+                 << " " << angle_scaled
+                 << " " << angular_speed_error_scaled
+                 << " " << linear_speed_error_scaled
+                 << " " << left_speed
+                 << " " << right_speed
+                 << " " << weg_extension
+                 << " " << target_idx
+                 << " " << chassis_pos.x()
+                 << " " << chassis_pos.y()
+                 << " " << chassis_pos.z()
+                 << " " << state
+                 << endl;
+#endif
         }
-
-        // cout << world->getTime() << " " << angle << " " << state << endl;
 
         ugv->setCommand(wheel_idxs.at(0), right_speed);
         ugv->setCommand(wheel_idxs.at(1), left_speed);

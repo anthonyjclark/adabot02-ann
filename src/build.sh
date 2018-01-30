@@ -24,10 +24,12 @@ function erun () {
 function compile () {
     if [ -z "$2" ]; then
         DEF=""
+        BIN_NAME=$BIN_DIR/$1
     else
         DEF="-D$2"
+        BIN_NAME=$BIN_DIR/$1_vis
     fi
-    erun $COMPILER $CPP_FLAGS $LD_FLAGS $INC_DIRS $LIB_DIRS $LIBS $1/$1.cpp -o $BIN_DIR/$1 $DEF
+    erun $COMPILER $CPP_FLAGS $LD_FLAGS $INC_DIRS $LIB_DIRS $LIBS $1/$1.cpp -o $BIN_NAME $DEF
 }
 
 function build () {

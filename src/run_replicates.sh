@@ -26,11 +26,16 @@ for (( i = 1; i <= $NUM_REPS; i++ )); do
 
     repname="seed"$(printf %02d $i)
 
-    mkdir $repname
-    cd $repname
+    # Don't recreate or overwrite current directories
+    if [ ! -d "$repname" ]; then
+        mkdir $repname
+        cd $repname
 
-    run_and_time "../bin/evolve_ugv_""$BIN_NAME"".py --seed $i --obst $NUM_OBSTACLES"
+        run_and_time "../bin/evolve_ugv_""$BIN_NAME"".py --seed $i --obst $NUM_OBSTACLES"
 
-    cd ..
+        cd ..
+    else
+        echo "$repname"" already exists"
+    fi
 
 done

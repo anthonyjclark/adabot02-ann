@@ -318,7 +318,7 @@ int main(int argc, char const *argv[])
     }
 
 #ifdef VISUALIZE
-    cerr << "\nweights " << weights << endl;
+    cerr << "\nweights\n" << weights << endl;
 #endif
 
     if (NI != 3 || NO != 3 || w_idx != ((NI + 1)*NO)) {
@@ -503,6 +503,9 @@ int main(int argc, char const *argv[])
     // Controllers
     //
 
+    // 730 RPM --> 76.44542115 rad/s
+    constexpr double MAX_ABS_RADS = 20;
+
     // The PD controller can be reused by all wegs
     PDController weg_pd{1, 0.1, TIME_STEP};
 
@@ -515,9 +518,6 @@ int main(int argc, char const *argv[])
 
     double next_control_update_time = 0;
     constexpr double CONTROL_STEP = 0.1;
-
-    // 730 RPM --> 76.44542115 rad/s
-    constexpr double MAX_ABS_RADS = 20;
 
 
 #ifdef VISUALIZE
@@ -546,6 +546,12 @@ int main(int argc, char const *argv[])
     double linear_speed_error = 0;
     double alpha = 0.25;
 
+#ifdef VISUALIZE
+    cout << "time angle_scaled angle_scaled angular_speed_error_scaled linear_speed_error_scaled"
+            "left_speed right_speed weg_extension target_idx x y z";
+    cout << " l r w" << endl;
+#endif
+
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
         world->step();
@@ -565,6 +571,8 @@ int main(int argc, char const *argv[])
             auto Vn = Vector3d(0, 1, 0);
 
             auto angle = std::atan2(Va.cross(Vb).dot(Vn), Va.dot(Vb));
+            double angle_scaled = (angle + 1_pi) / 2_pi;
+
             target_dist = (chassis_pos - targets[target_idx]).norm();
 
             if (target_dist < 8_cm) {
@@ -606,7 +614,7 @@ int main(int argc, char const *argv[])
             //      << "," << expected_angular_speed
             //      << "," << angular_speed_error << endl;
 
-            nn_input(0) = angle;
+            nn_input(0) = angle_scaled;
             nn_input(1) = angular_speed_error_scaled;
             nn_input(2) = linear_speed_error_scaled;
 
@@ -630,18 +638,24 @@ int main(int argc, char const *argv[])
             left_speed = min(max_rads, (l * (max_s - min_s) + min_s));
             right_speed = min(max_rads, (r * (max_s - min_s) + min_s));
 
-            // cout << world->getTime()
-            //      << " " << left_speed
-            //      << " " << right_speed
-            //      << " " << weg_extension
-            //      << " " << l
-            //      << " " << r
-            //      << " " << w
-            //      << "\n" << nn_output
-            //      << endl;
+#ifdef VISUALIZE
+            cout << world->getTime()
+                 << " " << angle_scaled
+                 << " " << angular_speed_error_scaled
+                 << " " << linear_speed_error_scaled
+                 << " " << left_speed
+                 << " " << right_speed
+                 << " " << weg_extension
+                 << " " << target_idx
+                 << " " << chassis_pos.x()
+                 << " " << chassis_pos.y()
+                 << " " << chassis_pos.z()
+                 << " " << l
+                 << " " << r
+                 << " " << w
+                 << endl;
+#endif
         }
-
-        // cout << world->getTime() << " " << angle << " " << state << endl;
 
         ugv->setCommand(wheel_idxs.at(0), right_speed);
         ugv->setCommand(wheel_idxs.at(1), left_speed);

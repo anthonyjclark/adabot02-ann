@@ -10,12 +10,31 @@ import argparse
 
 
 
+def range_transform(x, a, b, c, d):
+    # [a; b] --> [b; c]
+    return (x - a) * (d - c) / (b - a) + c
+
+
+
+def round_to_n_sigs(x, n):
+    if x == 0:
+        return 0
+    else:
+        return round(x, -int(floor(log10(abs(x)))) + (n - 1))
+
+
+
 
 NI = 3
 NO = 3
 N = (NI + 1) * NO
 random.seed(0)
 default_weights = [random.uniform(-4, 4) for i in range(N)]
+# default_weights = [range_transform(x, 0, 10, -4, 4) for x in [
+#     8.13116120247,3.4693241097,4.69875155704,4.43595619008,
+#     1.88799568627,5.11755726116,1.83902776765,4.49898107155,
+#     9.62081494357,6.25173827373,3.71849019629,6.62964143603
+# ]]
 
 
 
@@ -29,20 +48,6 @@ genome_to_args_map = [
 ]
 genome_to_args_map.extend([{
     'name': 'weight', 'default': f, 'minval': -4, 'maxval': 4, 'T': float} for f in default_weights])
-
-
-
-def range_transform(x, a, b, c, d):
-    # [a; b] --> [b; c]
-    return (x - a) * (d - c) / (b - a) + c
-
-
-
-def round_to_n_sigs(x, n):
-    if x == 0:
-        return 0
-    else:
-        return round(x, -int(floor(log10(abs(x)))) + (n - 1))
 
 
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Example: ./start_experiment.sh fsm 0 1 &!
 
 if [[ "$1" == "fsm" || "$1" == "bnn" ]]; then
     BIN_NAME="$1"

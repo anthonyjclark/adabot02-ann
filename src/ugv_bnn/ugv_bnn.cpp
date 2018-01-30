@@ -491,12 +491,12 @@ int main(int argc, char const *argv[])
 
     // The Bullet collision detector uses primitives instead of meshes, which makes
     // it faster and more useful for this simple application.
-    if (dart::collision::CollisionDetector::getFactory()->canCreate("bullet")) {
-        world->getConstraintSolver()->setCollisionDetector(
-            dart::collision::CollisionDetector::getFactory()->create("bullet"));
-    } else {
-        cerr << "NO BULLET" << endl;
-    }
+    // if (dart::collision::CollisionDetector::getFactory()->canCreate("bullet")) {
+    //     world->getConstraintSolver()->setCollisionDetector(
+    //         dart::collision::CollisionDetector::getFactory()->create("bullet"));
+    // } else {
+    //     cerr << "NO BULLET" << endl;
+    // }
 
 
     //

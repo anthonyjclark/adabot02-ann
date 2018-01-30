@@ -20,7 +20,7 @@ else
 fi
 
 
-if [ ! -d "$DIRECTORY" ]; then
+if [ ! -d "experiments" ]; then
     echo "Expected to find 'experiments' directory" >&2; exit 1;
 fi
 

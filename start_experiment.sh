@@ -39,7 +39,7 @@ cd src
 cd ..
 
 # Create the directory and copy files
-mkdir -p "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES""/bin"
+mkdir -p "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES""-""$NUM_TRIALS""/bin"
 cp "src/bin/ugv_""$BIN_NAME" "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES""/bin"
 cp "src/ugv_""$BIN_NAME""/evolve_ugv_""$BIN_NAME"".py" "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES""/bin"
 cd "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES"

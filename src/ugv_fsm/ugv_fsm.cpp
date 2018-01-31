@@ -688,7 +688,7 @@ int main(int argc, char const *argv[])
             weg_extension = w * max_w;
 
             // Speed scaled by weg extension
-            double w_speed_scale_factor = 1.0 - (w / 2.0);
+            double w_speed_scale_factor = 1.0 - (w / 1.25);
             const double max_rads = MAX_ABS_RADS * w_speed_scale_factor;
 
             left_speed = max(-max_rads, min(max_rads, fsm[state].left_speed));

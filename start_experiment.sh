@@ -2,6 +2,10 @@
 
 # Example: ./start_experiment.sh fsm 0 1 &!
 
+set -e
+
+
+
 if [[ "$1" == "fsm" || "$1" == "bnn" ]]; then
     BIN_NAME="$1"
 else
@@ -39,10 +43,12 @@ cd src
 cd ..
 
 # Create the directory and copy files
-mkdir -p "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES""-""$NUM_TRIALS""/bin"
-cp "src/bin/ugv_""$BIN_NAME" "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES""/bin"
-cp "src/ugv_""$BIN_NAME""/evolve_ugv_""$BIN_NAME"".py" "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES""/bin"
-cd "./experiments/""$BIN_NAME""-""$NUM_OBSTACLES"
+EXP_DIR="./experiments/""$BIN_NAME""-""$NUM_OBSTACLES""-""$NUM_TRIALS"
+
+mkdir -p "$EXP_DIR""/bin"
+cp "src/bin/ugv_""$BIN_NAME" "$EXP_DIR""/bin"
+cp "src/ugv_""$BIN_NAME""/evolve_ugv_""$BIN_NAME"".py" "$EXP_DIR""/bin"
+cd "$EXP_DIR"
 
 
 NUM_REPS=20

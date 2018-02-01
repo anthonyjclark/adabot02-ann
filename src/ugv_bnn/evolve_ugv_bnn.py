@@ -115,7 +115,7 @@ def evolve(initial_genome, seed):
         'seed': seed,
         'bounds': [0, MAX_G_VAL],
         # 'maxiter': 100,
-        'timeout': 1 * 60**2,
+        'timeout': 2 * 60**2,
         # 'verb_plot': ...,
         'integer_variables': [3, 4],
         # 'verb_log': ...

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Example: ./start_experiment.sh fsm 0 1 &!
+# Example: ./start_experiment.sh fsm 0 1 &> fsm-0-1_log.txt &!
 
 set -e
 
@@ -21,7 +21,7 @@ fi
 if [[ -n "$3" && $3 =~ ^[0-9]+$ ]]; then
     NUM_TRIALS="$3"
 else
-    echo "Second argument (number of trials) must be an integer" >&2; exit 1;
+    echo "Third argument (number of trials) must be an integer" >&2; exit 1;
 fi
 
 

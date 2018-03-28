@@ -3,10 +3,15 @@
   \WarningFilter{biblatex}{Patching footnotes failed}
   \WarningFilter{hyperref}{Option `pdflang' has already been used}
   \WarningFilter{hyperref}{Option `pdfdisplaydoctitle' has already been used}
+  \WarningFilter{hyperref}{Token not allowed in a PDF string}
   % main.tex: Package biblatex Warning: Field 'prefixnumber' deprecated. Please use 'labelprefix' instead.
   \WarningFilter{biblatex}{Field 'prefixnumber' deprecated.}
+  \WarningFilter{Fancyhdr}{\headheight is too small}
 
-\documentclass[sigconf,natbib=false]{acmart}
+\documentclass[sigconf,natbib=false,anonymous=true]{acmart}
+
+%%% Subliminal refinements towards typographical perfection (1%)
+% \usepackage[stretch=10]{microtype}
 
 %drt24 hacks
 % Letter paper
@@ -24,10 +29,14 @@
 \usepackage{csquotes}
 \usepackage[style=ACM-Reference-Format,
   abbreviate=true, dateabbrev=true, isbn=true, doi=true, urldate=comp, url=true, eprint=false,
-  maxnames=4, minnames=4, backref=false, backend=biber, language=american, sortcites=true,
+  maxbibnames=9, minbibnames=9, maxcitenames=1, mincitenames=1,
+  backref=false, backend=biber, language=american, sortcites=true,
   autocite=inline% , labelnumber=true
   ]{biblatex}
 % \cite, \parencite, \footcite, \textcite, \autocite
+
+\setcounter{biburlnumpenalty}{100}
+\setcounter{biburllcpenalty}{9000}
 
 \addbibresource{references/gecco2018.bib}
 \renewcommand{\bibfont}{\Small}
@@ -41,6 +50,11 @@
 
 %%% Easier SI units
 \usepackage[allowlitunits]{siunitx}
+
+%%% Improved subfigures
+% \usepackage[caption=false,font=footnotesize]{subfig}
+\usepackage[caption=false,font=footnotesize]{subfig}
+\usepackage[export]{adjustbox}
 
 %%% Better looking tables
 \usepackage{booktabs}
@@ -57,6 +71,10 @@
 %%% Colors for tracking changes
 \newcommand{\red}[1]{\textcolor{red}{#1}}
 \newcommand{\blue}[1]{\textcolor{blue}{#1}}
+
+% \usepackage{setspace}
+% \doublespacing
+
 
 %%% Commands for easily changing formatting (e.g., italicize)
 \newcommand{\etal}{et~al.}
@@ -79,33 +97,40 @@
 \acmPrice{15.00}
 
 % Removes citation information below abstract
-\settopmatter{printacmref=false}
+% \settopmatter{printacmref=false}
 
 
 \begin{document}
-\title{Comparing Finite State MacHines and Artificial Neural Networks for Controlling a UGV}
-% \titlenote{Produces the permission block, and copyright information}
-% \subtitle{Extended Abstract}
-% \subtitlenote{The full version of the author's guide is available as  \texttt{acmart.pdf} document}
-
+\title{Evolving State Machines and Neural Networks\\for an Autonomous UGV}
 
 \author{Anthony J. Clark}
 \affiliation{%
-  \institution{Missouri State University}
+  \institution{Computer Science Department\\Missouri State University}
   \city{Springfield}
   \state{Missouri}
   \country{USA}
 }
-\email{AnthonyClark@MissouriState.edu}
+\email{anthonyclark@missouristate.edu}
+
+
+\author{Keith A. Cissell}
+\affiliation{%
+  \institution{Computer Science Department\\Missouri State University}
+  \city{Springfield}
+  \state{Missouri}
+  \country{USA}
+}
+\email{keithacissell@gmail.com}
+
 
 \author{Jared M. Moore}
 \affiliation{%
-  \institution{Grand Valley State University}
-  \city{Grand Rapids?}
+  \institution{School of Computing and Information Systems\\Grand Valley State University}
+  \city{Allendale}
   \state{Michigan}
   \country{USA}
 }
-\email{jared@email.com}
+\email{moorejar@gvsu.edu}
 
 
 \input{sections/_0-abstract}
@@ -138,12 +163,11 @@
 \maketitle
 
 \input{sections/_1-introduction}
-% \input{sections/_2-background}
-% \input{sections/_3-adabot}
-% \input{sections/_4-simulation}
-% \input{sections/_5-results}
-% \input{sections/_6-conclusion}
-% \input{sections/_7-acknowledgments}
+\input{sections/_2-related-work}
+\input{sections/_3-adabot}
+\input{sections/_4-results}
+\input{sections/_5-conclusion}
+\input{sections/_6-acknowledgments}
 
 \printbibliography
 

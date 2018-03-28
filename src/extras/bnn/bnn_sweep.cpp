@@ -29,6 +29,11 @@ int main(int argc, char const *argv[])
         weights(w_idx++) = val;
     }
 
+    // while (w_idx < N) {
+    //     weights(w_idx++) = 0;
+    // }
+    // weights(12) = 1;
+
     if (w_idx != N) {
         cerr << "Incorrect number of weights." << endl;
         return 1;

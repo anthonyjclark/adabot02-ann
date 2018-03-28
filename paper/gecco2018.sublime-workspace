@@ -4,6 +4,34 @@
 		"selected_items":
 		[
 			[
+				"enumera",
+				"\\begin{enumerate}                                 \tlatex-document"
+			],
+			[
+				"deg",
+				"\\degree                                           \tsiunitx"
+			],
+			[
+				"subse",
+				"\\subsection{}"
+			],
+			[
+				"citeaut",
+				"\\citeauthor{key}                                  \tbiblatex"
+			],
+			[
+				"eg",
+				"\\eg{}                                             \tlocal"
+			],
+			[
+				"section",
+				"\\section{}"
+			],
+			[
+				"input",
+				"\\input{file}                                      \tlatex-document"
+			],
+			[
 				"linear",
 				"linear_error"
 			],
@@ -486,10 +514,6 @@
 			[
 				"recruit",
 				"recruitment"
-			],
-			[
-				"pub",
-				"publications"
 			]
 		]
 	},
@@ -499,8 +523,7 @@
 			"file": "main.tex",
 			"settings":
 			{
-				"buffer_size": 4749,
-				"encoding": "UTF-8",
+				"buffer_size": 4854,
 				"line_ending": "Unix"
 			}
 		}
@@ -596,10 +619,22 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 105.0,
-		"last_filter": "javasc",
+		"height": 357.0,
+		"last_filter": "smart",
 		"selected_items":
 		[
+			[
+				"smart",
+				"Convert Case: Smart Title Case"
+			],
+			[
+				"smarttitle",
+				"Convert Case: Smart Title Case"
+			],
+			[
+				"title",
+				"Convert Case: Smart Title Case"
+			],
 			[
 				"javasc",
 				"Set Syntax: JavaScript"
@@ -667,14 +702,6 @@
 			[
 				"synjson",
 				"Set Syntax: JSON"
-			],
-			[
-				"smart",
-				"Convert Case: Smart Title Case"
-			],
-			[
-				"title",
-				"Convert Case: Title Case"
 			],
 			[
 				"word",
@@ -867,6 +894,21 @@
 	],
 	"file_history":
 	[
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_0-abstract.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/references/gecco2018.bib",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_4-results.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/main.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_3-adabot.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_5-conclusion.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_1-introduction.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_2-related-work.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_7-acknowledgments.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_2-background.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/acmart.cls",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/_6-conclusion.tex",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/sections/1-introduction.tex",
+		"/usr/local/texlive/2016/texmf-dist/tex/latex/biblatex/biblatex.sty",
+		"/Users/ajc/Documents/projects/adabot/adabot02-ann/paper/gecco2018.sublime-project",
 		"/Users/ajc/Documents/projects/adabot/adabot02-ann/src/ugv_fsm/ugv_fsm.cpp",
 		"/Users/ajc/Documents/projects/adabot/adabot02-ann/src/extras/bnn/bnn.hpp",
 		"/Users/ajc/Documents/projects/adabot/adabot02-ann/src/tmp.json",
@@ -979,32 +1021,21 @@
 		"/Users/ajc/Documents/projects/adabot02/dart/dart/collision/DistanceFilter.hpp",
 		"/Users/ajc/Documents/projects/adabot02/replay_logger/replay_logger.hpp",
 		"/Users/ajc/Documents/projects/adabot02/falling_sphere/falling_sphere.cpp",
-		"/Users/ajc/Documents/projects/adabot02/falling_sphere/animation.json",
-		"/Users/ajc/Documents/projects/adabot02/tmp/tmp.cpp",
-		"/Users/ajc/Documents/projects/adabot02/writeup.md",
-		"/Users/ajc/Documents/projects/adabot02/tmp.cpp",
-		"/Users/ajc/Documents/projects/adabot02/skeleton/skeleton.cpp",
-		"/Users/ajc/Documents/projects/adabot02/pendulum/pendulum.cpp",
-		"/Users/ajc/Documents/projects/adabot02/hello_dart/hello_dart.cpp",
-		"/Users/ajc/Documents/projects/adabot02/multi_pendulum.cpp",
-		"/Users/ajc/Documents/projects/adabot02/deps.md",
-		"/Users/ajc/Documents/projects/adabot02/rust.rs",
-		"/Users/ajc/OneDrive - Missouri State University/courses/csc333/assignments/a8-parser/code/parser-skeleton.rs",
-		"/Users/ajc/OneDrive - Missouri State University/courses/csc333/assignments/a7-recognizer/code/recognizer.rs",
-		"/Users/ajc/OneDrive - Missouri State University/courses/csc742/projects/presentations.md",
-		"/Users/ajc/Documents/courses/udacity/roboics-nanodegree/06-deep-nn/RoboND-DeepLearning-Project/aws/RoboND-DeepLearning-Project/code/follower.py",
-		"/Users/ajc/Sites/personal-spike-test/views/index.html",
-		"/Users/ajc/Sites/personal-spike-test/views/_about.md"
+		"/Users/ajc/Documents/projects/adabot02/falling_sphere/animation.json"
 	],
 	"find":
 	{
-		"height": 44.0
+		"height": 22.0
 	},
 	"find_in_files":
 	{
 		"height": 120.0,
 		"where_history":
 		[
+			"*.tex",
+			"StrutCount",
+			"*.tex",
+			""
 		]
 	},
 	"find_state":
@@ -1012,6 +1043,134 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"Furthermore, we show that a UGV's controller and physical characteristics can be effectively chosen by examining results from evolutionary optimization.",
+			"Results show comparable performance between FSM and ANN controllers, but the evolved strategies differ.",
+			"Evolved finite state machines (FSMs) and artificial neural networks (ANNs) are compared, and a set of controller design principles are gathered from analyzing these experiments.",
+			"The UGV's mission is to visit a sequence of coordinates while automatically handling obstacles of varying sizes by extending wheel struts radially outward from the center of each wheel.",
+			"In this study, we evolve controllers and physical characteristics of a UGV with transformable wheels to improve its mobility in a simulated environment.",
+			"However, it is difficult to design these system so that they perform well in a variety of different environments.",
+			"Unmanned ground vehicles (UGVs) are well suited to tasks that are either too dangerous or too monotonous for people. For example, UGVs can traverse arduous terrain in search of disaster victims.",
+			"Unmanned ground vehicles (UGVs) are well suited to tasks that are either too dangerous or too monotonous for people. For example, UGVs can traverse arduous terrain in search of disaster victims.\n",
+			"left side",
+			"distributions for the evolved fitness values and",
+			"LeftState",
+			"max",
+			"heat-ma",
+			"png}",
+			"0.4",
+			"columnwidth",
+			"figure}",
+			"figure",
+			"fig:",
+			"~\\si{\\degree}",
+			"~si",
+			"\\degree",
+			"mechan",
+			"fig:wheel-extender",
+			"jpg.png.jpg",
+			"figures/1-introduction/perspective-image.jpg",
+			"valign",
+			"1-introduction",
+			"example-image-10x16",
+			"includegraphics",
+			"\\noindent\n\\textbf",
+			"1063",
+			"height=1.2in",
+			"height=1.5in",
+			"experiment. t",
+			"$ b",
+			"fig:FSM-best-params",
+			"distributions for all evolved fsm parameters for the ",
+			"preserve",
+			"communications of the acm",
+			"exten",
+			"for this test",
+			"device",
+			"Ext.Count",
+			"›",
+			"exten",
+			"extenders",
+			"exten",
+			"{Ext}",
+			"exten",
+			"extenders",
+			"exten",
+			"\\subsection",
+			"extenders",
+			"weg",
+			"\\paragraph{",
+			"paragraph",
+			"\\subsection{",
+			"\\subsection{Hardware}",
+			"\n%",
+			"however",
+			" b_{\\mathit{ext}}",
+			"fig:FSM-best-params",
+			"Heatmaps",
+			"heatmaps",
+			"ig:40-2-best-params",
+			"fig:40-2-best-params",
+			"environment",
+			"0-1-",
+			"height",
+			"FSM-0-1-best-params",
+			"\\fbox{\\crule[white]{0.4\\columnwidth}{2cm}}",
+			"fsm-0-1-best-trajctory",
+			"tbl:",
+			"alpha_{target",
+			"$\\alpha_{target}$",
+			"subsec",
+			"simula",
+			"\\label{tbl:",
+			"emph{\\textbf",
+			"height=1.5in",
+			"\\fbox{\\crule[white]{0.4\\columnwidth}{2cm}}",
+			"subfloat",
+			"subfig",
+			"generation",
+			"t_{\\mathit{remaining}_\\mathit{scaled}}",
+			"}}$",
+			"}}",
+			".To",
+			"ExtCount",
+			"WheelRadius",
+			"TrackWidth",
+			"WheelBase",
+			"Scale",
+			"RightToForward",
+			"numrange",
+			"-1}{   ,  1   ",
+			"\\deg",
+			"pi/2",
+			"}{/2",
+			"pi/2",
+			"maxval",
+			"minval",
+			"default",
+			"params-physical",
+			"\\end{table",
+			"6}{15",
+			"$",
+			"0\\\\",
+			"\\mathit",
+			"\\v_",
+			"mathit\\{UGV\\}",
+			"{UGV}",
+			"UGV",
+			"equation",
+			"(",
+			"fsm",
+			"howev",
+			"effec",
+			"wheel",
+			"evolutionary ro",
+			"Braitenberg",
+			"bibnames",
+			"names",
+			"maxn",
+			"=4",
+			"weg",
+			"inconvenient"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1019,6 +1178,8 @@
 		"regex": false,
 		"replace_history":
 		[
+			"StrutCount",
+			""
 		],
 		"reverse": false,
 		"show_context": true,
@@ -1035,32 +1196,31 @@
 				{
 					"buffer": 0,
 					"file": "main.tex",
-					"semi_transient": false,
+					"semi_transient": true,
 					"settings":
 					{
-						"buffer_size": 4749,
+						"buffer_size": 4854,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4675,
-								4675
+								1832,
+								1995
 							]
 						],
 						"settings":
 						{
 							"WordCount":
 							{
-								"changes": 1,
-								"count": 213,
+								"changes": 0,
+								"count": 190,
 								"modified": false,
 								"selection": false,
 								"status": -1,
 								"syntax": "plain text"
 							},
-							"_anf_new": "",
 							"bracket_highlighter.busy": false,
 							"bracket_highlighter.clone": -1,
 							"bracket_highlighter.clone_locations":
@@ -1080,31 +1240,46 @@
 							},
 							"bracket_highlighter.clone_regions":
 							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
 								"bh_double_quote",
 								"bh_double_quote_center",
 								"bh_double_quote_open",
 								"bh_double_quote_close",
 								"bh_double_quote_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
@@ -1115,21 +1290,6 @@
 								"bh_single_quote_open",
 								"bh_single_quote_close",
 								"bh_single_quote_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
@@ -1140,27 +1300,12 @@
 							{
 								"close":
 								{
-									"1":
-									[
-										4739,
-										4747
-									]
 								},
 								"icon":
 								{
-									"1":
-									[
-										"Packages/BracketHighlighter/icons/tag.png",
-										"region.orangish"
-									]
 								},
 								"open":
 								{
-									"1":
-									[
-										1109,
-										1117
-									]
 								},
 								"unmatched":
 								{
@@ -1168,31 +1313,46 @@
 							},
 							"bracket_highlighter.regions":
 							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
 								"bh_double_quote",
 								"bh_double_quote_center",
 								"bh_double_quote_open",
 								"bh_double_quote_close",
 								"bh_double_quote_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
 								"bh_unmatched",
 								"bh_unmatched_center",
 								"bh_unmatched_open",
@@ -1203,21 +1363,6 @@
 								"bh_single_quote_open",
 								"bh_single_quote_close",
 								"bh_single_quote_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
 								"bh_tag",
 								"bh_tag_center",
 								"bh_tag_open",
@@ -1229,7 +1374,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3642.0,
+						"translation.y": 3923.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1283,7 +1428,7 @@
 	},
 	"output.latextools":
 	{
-		"height": 447.0
+		"height": 310.0
 	},
 	"output.markdown":
 	{
@@ -1302,6 +1447,86 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"abstr",
+				"sections/_0-abstract.tex"
+			],
+			[
+				"bib",
+				"references/gecco2018.bib"
+			],
+			[
+				"rest",
+				"sections/_4-results.tex"
+			],
+			[
+				"ada",
+				"sections/_3-adabot.tex"
+			],
+			[
+				"abst",
+				"sections/_0-abstract.tex"
+			],
+			[
+				"intro",
+				"sections/_1-introduction.tex"
+			],
+			[
+				"concl",
+				"sections/_5-conclusion.tex"
+			],
+			[
+				"int",
+				"sections/_1-introduction.tex"
+			],
+			[
+				"adabot",
+				"sections/_3-adabot.tex"
+			],
+			[
+				"resu",
+				"sections/_4-results.tex"
+			],
+			[
+				"4re",
+				"sections/_4-results.tex"
+			],
+			[
+				"3",
+				"sections/_3-adabot.tex"
+			],
+			[
+				"related",
+				"sections/_2-related-work.tex"
+			],
+			[
+				"abs",
+				"sections/_0-abstract.tex"
+			],
+			[
+				"adabo",
+				"sections/_3-adabot.tex"
+			],
+			[
+				"ind",
+				"sections/_1-introduction.tex"
+			],
+			[
+				"3ada",
+				"sections/_3-adabot.tex"
+			],
+			[
+				"res",
+				"sections/_4-results.tex"
+			],
+			[
+				"ab",
+				"sections/_0-abstract.tex"
+			],
+			[
+				".bib",
+				"references/gecco2017.bib"
+			],
 			[
 				"conf",
 				"sample-sigconf-biblatex.tex"
@@ -1539,28 +1764,12 @@
 				"_5-results.tex"
 			],
 			[
-				"int",
-				"_1-introduction.tex"
-			],
-			[
-				"resu",
-				"_5-results.tex"
-			],
-			[
-				"intro",
-				"_1-introduction.tex"
-			],
-			[
 				"4",
 				"_4-simulation.tex"
 			],
 			[
 				"ack",
 				"_7-acknowledgments.tex"
-			],
-			[
-				"concl",
-				"_6-conclusion.tex"
 			],
 			[
 				"back",
@@ -1603,10 +1812,6 @@
 				"_4-simulation.tex"
 			],
 			[
-				"bib",
-				"references/riiss2017.bib"
-			],
-			[
 				"vmki",
 				"vm_kill.sh"
 			],
@@ -1627,20 +1832,8 @@
 				"main.tex"
 			],
 			[
-				"abs",
-				"_0-abstract.tex"
-			],
-			[
 				"5",
 				"_5-results.tex"
-			],
-			[
-				"3",
-				"_3-robot.tex"
-			],
-			[
-				"ab",
-				"_0-abstract.tex"
 			],
 			[
 				"robo",
@@ -1715,10 +1908,6 @@
 				"acm-classification-keywords.tex"
 			],
 			[
-				"abst",
-				"s0-abstract.tex"
-			],
-			[
 				"acm-",
 				"acm-classification-keywords.tex"
 			],
@@ -1769,50 +1958,6 @@
 			[
 				"and16hdl",
 				"And16.hdl"
-			],
-			[
-				"and16",
-				"And16.cmp"
-			],
-			[
-				"not1hdl",
-				"Not16.hdl"
-			],
-			[
-				"dmhdl",
-				"DMux.hdl"
-			],
-			[
-				"muxcmp",
-				"Mux.cmp"
-			],
-			[
-				"muxhdl",
-				"Mux.hdl"
-			],
-			[
-				"xorhdl",
-				"Xor.hdl"
-			],
-			[
-				"or.hdl",
-				"Or.hdl"
-			],
-			[
-				"not.hdl",
-				"Not.hdl"
-			],
-			[
-				"rua",
-				"grade/run_autograder"
-			],
-			[
-				"inpufi",
-				"code/py/input_file.txt"
-			],
-			[
-				"inp",
-				"code/py/input_file.txt"
 			]
 		],
 		"width": 0.0

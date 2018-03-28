@@ -63,3 +63,6 @@ Temporary Items
 bin/
 generated_files/
 pdfs/
+
+.ipynb_checkpoints
+

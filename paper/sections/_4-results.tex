@@ -3,7 +3,7 @@
 
 In this section we provide our results from evolving the Adabot.
 %
-Specifically, we evolved the Adabot in two environments (with and without obstacles) and with two different controllers (the FSM defined in \secref{sec:adabot} and an ANN). Each of these four experiments is repeated 20 times.
+Specifically, we evolved the Adabot in two environments (with and without obstacles) and with two different controllers. Each of these four experiments is repeated 20 times.
 %
 Finally, we discuss principles that can be learned from these experiments.
 
@@ -18,20 +18,20 @@ During a single simulation, the device has 30 seconds to visit \textbf{four} pre
 %
 Fitness is calculated as follows:
 
-\vspace{-0.08in}
+\vspace{-0.15in}
 
 \begin{align}
     f &= 2w + (1-\frac{\min[d, d_\mathit{max}]}{d_\mathit{max}}) + \frac{(30 - t)}{30}
 \end{align}
 
 \noindent
-where $w$ represents the number of way-points reached, $d$ and $d_\mathit{max}$ denote the distance to the next way-point and a scaling factor for distances, respectively, and $t$ denotes the time at the end of the evaluation.
+where $w$ represents the number of way-points reached, $d$ and $d_\mathit{max}$ denote the distance to the next way-point and a scaling factor for distances, respectively, and $t$ denotes the time transpired.
 %
 This function is meant to provide a smooth gradient for generating controllers that quickly navigate to all way-points in order.
 %
 The first part of the equation ensures that the CMA-ES algorithm heavily favors any controller that reaches even a single way-point; values for this component range from 0 to 8.
 %
-Next, a distance component is added to reward any solutions that drive near its next way-point. This is particularly useful at the beginning when solutions are randomly generated.
+Next, a distance component is added to reward solutions that drive near the next way-point in sequence, but do not reach all four. This is particularly useful at the beginning when solutions are at an early stage of evolution.
 %
 The distance component results in a value scaled between 0 and 1.
 %
@@ -44,7 +44,7 @@ Thus, the maximum possible fitness is 10.
 
 \subsection{Evolution Without Obstacles}
 
-In our first experiment, \emph{FSM-0-1}, we evolve the fifteen parameters found in Tables~\ref{tbl:params-physical} and~\ref{tbl:params-fsm} in an environment without obstacles.
+In our first experiment, \emph{FSM-0-1}, we evolve the fifteen parameters found in Tables~\ref{tbl:params-physical} (physical) and~\ref{tbl:params-fsm} (control) in an environment without obstacles.
 %
 The naming scheme for our experiments indicates the controller type (\emph{FSM} or \emph{ANN}), the maximum number of potential obstacles (0 or 40), and the number of trials per fitness evaluation (1 or 2).
 %
@@ -52,9 +52,9 @@ Plots of fitness vs iteration are show in \figref{fig:fitness-vs-iteration} (thi
 %
 In this first experiment, there are zero obstacles and therefore the environment will always be the same. In later experiments, each fitness evaluation includes two trials with randomly generated obstacles.
 %
-As shown in the figure, in all replicate trials the Adabot reaches all four way-points in approximately 10 seconds, which corresponds to a fitness value of 9.7.
+As shown in the figure, in all replicate experiments the Adabot reaches all four way-points in approximately 10 seconds, which corresponds to a fitness value of 9.7.
 %
-The population quickly converges on a final value, likely because this experiment was seeded with a hand-designed set of parameters known to achieve good results; the evolved results, however, quickly outperform the hand-chosen values.
+The population quickly converges on a final value, likely because this experiment was seeded with a hand-designed set of parameters known to achieve good results (see Table~\ref{tbl:params-fsm}); the evolved results, however, quickly outperform the hand-chosen values.
 %
 This experiment serves as a convenient baseline with which the others can be compared.
 
@@ -65,10 +65,10 @@ This experiment serves as a convenient baseline with which the others can be com
 
     \vspace{-0.1in}
 
-    \caption{Fitness plots for the maximum fitness found in each of the four experiments. The shaded regions indicate confidence intervals of one standard deviation from the mean for the 20 replicated trials of each experiment. The maximum possible fitness is 10 and any fitness value above 2 means that UGV was able to reach at least one way-point.}
+    \caption{Plots for the maximum fitness found in each of the four experiments. Shaded regions indicate confidence intervals of one standard deviation from the mean for the 20 replicates of each experiment. The maximum possible fitness is 10, and fitness values above 2 indicate that Adabot was able to reach at least one way-point.}
     \label{fig:fitness-vs-iteration}
 
-    \vspace{-0.05in}
+    \vspace{-0.1in}
 \end{figure}
 
 
@@ -83,7 +83,7 @@ This can be explained by the lack of a seed controller and the fact that, unlike
 
 \figref{fig:0-1-best-trajectories} depicts the trajectories taken by the best performing controllers from these two experiments.
 %
-Although these trajectories look similar, there is one key difference: the ANN actively controls only one wheel. The FSM, on the other hand, occasionally rotates in both directions by turning its left and right side wheels in opposite directions.
+Although these trajectories look similar, there is one key difference: the ANN actively controls only one wheel. FSMs, on the other hand, rotate both directions in-place, which is why there are sharper turns in the left plot.
 
 
 \begin{figure}[!ht]
@@ -91,8 +91,12 @@ Although these trajectories look similar, there is one key difference: the ANN a
 
     \includegraphics[width=\columnwidth]{figures/4-results/0-1-best_trajectories.png}
 
+    \vspace{-0.12in}
+
     \caption{Trajectories of the best evolved individual for the first two experiments: FSM-0-1 and ANN-0-1. No obstacles were present for these trajectories.}
     \label{fig:0-1-best-trajectories}
+
+    \vspace{-0.1in}
 \end{figure}
 
 
@@ -112,8 +116,12 @@ Effectively, the ANN can only turn left, however, this is not a problem for the 
     \centering
 
     \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/FSM-0-1-best_speed.png}}
-    \hfil
+
+    \vspace{-0.08in}
+
     \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/ANN-0-1-best_speed.png}}
+
+    \vspace{-0.08in}
 
     \caption{Left and right wheel speeds for the best evolved solutions for \emph{FSM-0-1} (a) and \emph{ANN-0-1} (b).}
     \label{fig:ANN-0-1-best-speed}
@@ -128,7 +136,7 @@ This figure only shows results for the combined final populations of all replica
 %
 From this figure, we can establish what will be good physical characteristics for the Adabot when it does not face any obstacles.
 %
-Specifically, \emph{WheelBase} and \emph{TrackWidth} should be 8.5~\si{cm} and 11.5~\si{cm}, respectively, \emph{WheelRadius} should be 3~\si{cm}, and each wheel should have at least 4 wheel struts (\emph{StrutCount}).
+Specifically, \emph{WheelBase} and \emph{TrackWidth} should be 8.5~\si{cm} and 11.5~\si{cm}, respectively, \emph{WheelRadius} should be 3~\si{cm}, and \emph{StrutCount} does not matter since the struts are not extended.
 
 
 \begin{figure}[!ht]
@@ -136,19 +144,21 @@ Specifically, \emph{WheelBase} and \emph{TrackWidth} should be 8.5~\si{cm} and 1
 
     \includegraphics[width=\columnwidth]{figures/4-results/0-1-best_params.png}
 
+    \vspace{-0.1in}
+
     \caption{Distributions for the evolved fitness values and physical characteristics for the combined final populations of the \emph{FSM-0-1} (left side) and \emph{ANN-0-1} (right side) experiments. The y-axis limits are the parameter limits allowed during evolution.}
     \label{fig:0-1-best-params}
 
-    \vspace{-0.2in}
+    \vspace{-0.1in}
 
 \end{figure}
 
 
 Finally, \figref{fig:FSM-best-params}(a) plots the distributions for all evolved FSM parameters.
 %
-It is worth noting that neither the evolved FSMs or ANNs extend the struts.
+It is worth noting that in the absence of obstacles, neither the evolved FSMs or ANNs extend the struts.
 %
-This results is not unexpected as any extension would result in a reduced speed (due to the scaling mentioned in \secref{sec:adabot}), and the struts are not needed when obstacles are not present.
+This result is not unexpected as any extension would result in a reduced speed (due to the scaling mentioned previously), and the struts are not needed when obstacles are not present.
 %
 Also of interest is the evolved symmetry of the FSM.
 %
@@ -163,6 +173,8 @@ Specifically, the threshold values and speeds evolved for the \emph{Left} and \e
     % \subfloat[]{\includegraphics[width=\textwidth]{figures/4-results/FSM-40-2-best_params.png}}
 
     \includegraphics[width=\textwidth]{figures/4-results/FSM-0-1-best_params.png}
+
+    \vspace{-0.08in}
 
     % \caption{Distributions for all evolved FSM parameters for the \emph{FSM-0-1} and \emph{FSM-40-2} experiments.}
     \caption{Distributions for all evolved FSM parameters for the \emph{FSM-0-1} experiment.}
@@ -180,21 +192,25 @@ Specifically, the threshold values and speeds evolved for the \emph{Left} and \e
 
 The final two evolutionary experiments are referred to as \emph{FSM-40-2} and \emph{ANN-40-2}.
 %
-These experiments differ from the previous two in two respects. First, each fitness value is calculated as the average of two trials (where each trial lasts at most 30 seconds), and second, each fitness trial occurs in an environment with at most 40 randomly generated obstacles.
+These experiments differ from the previous two in two respects. First, each fitness value is calculated as the average of two trials (where each trial lasts at most 30 seconds), and second, each fitness trial occurs in an environment with around 31 randomly generated obstacles.
 %
-Utilizing multiple trials during fitness evaluations improves the robustness of the evolved results~\autocite{Ruud.SSCI.EvoLearn.2016}.
+Utilizing multiple trials during fitness evaluations improves the robustness of the evolved results~\citep{Ruud.SSCI.EvoLearn.2016}.
 %
 The fitness plots for these experiments appear in \figref{fig:fitness-vs-iteration}.
 %
 Of note is that the ANNs evolved with obstacles have a greatly reduced maximum fitness. A few individuals achieve a fitness above 9, however, we found that this was only when the randomly generated environment did not pose much difficulty.
 %
-We have provided videos for the highest fitness individuals from both experiments\footnote{\emph{FSM-40-2} example behavior: \url{https://youtu.be/VXnrwwpE598}}\footnote{\emph{BNN-40-2} example behavior: \url{https://youtu.be/q8PFqQps5e4}}.
+Videos (and interactive animations) for high fitness individuals can be found here: \emph{FSM-40-2}: \url{https://youtu.be/VXnrwwpE598} (\url{https://goo.gl/NtoVYe}); and \emph{ANN-40-2}: \url{https://youtu.be/q8PFqQps5e4} (\url{https://goo.gl/2xjh6X}).
+%
+% We have provided videos for the highest fitness individuals from both experiments: \emph{FSM-40-2} example behavior: \url{https://youtu.be/VXnrwwpE598}; and \emph{ANN-40-2} example behavior: \url{https://youtu.be/q8PFqQps5e4}.
 
 
 % After reviewing the distributions in Figures~\ref{fig:0-1-best-params} and~\ref{fig:40-2-best-params}
 Similar to \figref{fig:0-1-best-params}, \figref{fig:40-2-best-params} shows the distributions for the evolved physical characteristics.
 %
-The values found in these distributions indicates that the presence of obstacles does not have a drastic affect on the evolution of physical characteristics.
+These distributions have a larger spread due to the randomly generated environments.
+%
+The values found in these distributions indicate that the presence of obstacles does not have a drastic affect on the evolution of physical characteristics.
 %
 At first this was unexpected, however, analyzing these values (and visualizing their resulting behaviors) reveals a few basic principles:
 (1) for a skid steer robot it is important for the \emph{WheelBase} to be less than the \emph{TrackWidth} (this will reduce the amount of \emph{skidding} and improve controllability),
@@ -203,7 +219,7 @@ At first this was unexpected, however, analyzing these values (and visualizing t
 %
 The first and second principles match results that we have seen on the physical prototype, and we intend to investigate the third principle in the near future.
 %
-This leaves us with control being the most important factor in navigating obstacles.
+% This leaves us with control being the most important factor in navigating obstacles.
 
 
 \begin{figure}[!ht]
@@ -216,30 +232,32 @@ This leaves us with control being the most important factor in navigating obstac
     \caption{Distributions for the evolved fitness values and physical characteristics for the combined final populations of the \emph{FSM-40-2} (left side) and \emph{ANN-40-2} (right side) experiments. The y-axis limits are the parameter limits allowed during evolution.}
     \label{fig:40-2-best-params}
 
-    \vspace{-0.2in}
+    % \vspace{-0.2in}
 
 \end{figure}
 
 
 
-While the physical characteristics are similar between the two sets of experiments, control strategies have been changed to handle the obstacles.
+While the physical characteristics are similar between the two sets of experiments, control strategies have been adjusted to handle the obstacles.
 %
 \figref{fig:40-2-best-speed} shows the control patterns for two solutions randomly selected from the best performing individuals of the \emph{FSM-40-2} and \emph{ANN-40-2} experiments.
 %
 Note that since environments are randomly generated, even though the evolved ANN does not reach all four way-points for this test, it does not mean that it did not do so during fitness evaluation.
 %
-The most important feature of the plots in \figref{fig:40-2-best-speed} are that the evolved controllers are operating at a reduced speed.
+The most important feature of the plots in \figref{fig:40-2-best-speed} are that the evolved controllers are operating at reduced speeds.
 %
 % Examining the evolved values in \figref{fig:FSM-best-params} shows that for at least the \emph{FSM-40-2}, the evolved speeds are still near the maximum allowed value.
 %
-Examining the evolved FSM values , we see that nearly identical values are discovered for all parameters except $b_{\mathit{ext}}$
+Examining the evolved FSM values, we see that nearly identical values are discovered for all parameters except $b_{\mathit{ext}}$
 (a set of distributions similar to \figref{fig:FSM-best-params} has been omitted to save space).
 %
-In the experiment with no obstacles, $b_{\mathit{ext}}$ was consistently set to a value near zero, however, for this experiment $b_{\mathit{ext}}$ was set to 0.45.
+In the experiment with no obstacles, $b_{\mathit{ext}}$ converged to zero, however, for this experiment $b_{\mathit{ext}}$ converged to 0.45.
 %
 A higher value for $b_{\mathit{ext}}$ results in the struts always being extended (even when no obstacle has been encountered).
 %
-Thus, the cause of the slower behavior is that the controllers are using the struts to improve mobility in the face of obstacles.
+Thus, these behaviors are slower because the struts are required to climb obstacles.
+
+% the cause of the slower behavior is that the controllers are using the struts to improve mobility in the face of obstacles.
 %
 % This can also be seen by looking at the evolved values for $b_{\mathit{ext}}$, without obstacles this value is near zero, and with obstacles this value is closer to 0.45.
 
@@ -250,15 +268,17 @@ Thus, the cause of the slower behavior is that the controllers are using the str
     \centering
 
     \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/FSM-40-2-best_speed.png}}
-    \hfil
+
+    \vspace{-0.08in}
+
     \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/ANN-40-2-best_speed.png}}
 
-    \vspace{-0.1in}
+    \vspace{-0.08in}
 
     \caption{Left and right wheel speeds for the best evolved FSM (a) and ANN (b) in a randomly generated environment that includes obstacles.}
     \label{fig:40-2-best-speed}
 
-    \vspace{-0.1in}
+    \vspace{-0.2in}
 
 \end{figure}
 
@@ -266,23 +286,23 @@ Thus, the cause of the slower behavior is that the controllers are using the str
 
 
 
-The final set of evolved parameters to examine is those of the neural network.
+% The final set of evolved parameters to examine is those of the neural network.
 %
-Directly examining the evolved weights provides only a limited view of the resulting behavior. Likewise, comparing each input's effect on each output in isolation also obscures analysis.
+Directly examining the evolved weights of a neural network provides only a limited view of the resulting behavior. Likewise, comparing each input's effect on each output in isolation obscures the resulting behaviors.
 %
-For example, some output values are only active when some combination of multiple input values is provided.
+For example, some output values are only active when some combination of multiple input values are provided.
 %
-Thus, in \figref{fig:ANN-40-2-best-ann-map} we provide all pairwise heat-maps for all inputs and outputs.
+Thus, in \figref{fig:ANN-40-2-best-ann-map} we provide all pairwise input relationships on the output for the speed of the left wheels in the form of heat-maps.
 %
-These heat-maps were generated using a parameter sweep over all possible input combinations. Each square represents the average output value given the two input values on the x- and y-axes and all possible values for the remaining input.
+These heat-maps were generated using a parameter sweep over all possible input combinations. Each square represents the output value given the two input values on the x- and y-axes averaged over all possible values for the remaining input.
 %
-Looking at the second and third rows in this figure we can see that for any combination of input values the right wheel is always rotating at a constant forward speed and the struts are always fully extended, respectively.
+% Looking at the second and third rows in this figure we can see that for any combination of input values the right wheel is always rotating at a constant forward speed and the struts are always fully extended, respectively.
 %
-As was the case for the \emph{ANN-0-1} experiment, all navigation is handled by driving the left wheel at different speeds.
+As was the case for the \emph{ANN-0-1} experiment, all navigation is handled by driving the left wheel at different speeds, and so we have not provided heat-maps for the wheel strut and right speed outputs.
 %
-Examining the first row shows that the left wheel's speed has a linear relationship with all three neural network inputs.
+Examining the figure shows that the left wheel's speed has a positive linear relationship with both $\omega_e$ and $\alpha_{\mathit{target}}$, and that $\alpha_{\mathit{target}}$ has the greatest effect on control (since it is used to turn the robot towards the target).
 %
-As any of the inputs are increased, so to does the left wheel speed.
+% As any of the inputs are increased, so to does the left wheel speed.
 
 
 In both experiments including obstacles, the evolved controllers extended the struts and never fully retracted them.
@@ -291,23 +311,27 @@ However, there is a clear advantage to retracting the struts: the robot has a hi
 %
 Thus, it is likely an issue with using the differential drive model to calculate the error.
 %
-We have identified two sources of error with simple model: (1) it does not take into account that when the struts are extended the wheel has a larger effective radius, and (2) the model does not take into account the noisy nature of a skid steering and extended struts.
+We have identified two sources of error with the simple model: (1) it does not take into account that when the struts are extended the wheel has a larger effective radius, and (2) the model does not take into account the noisy nature of a skid steering and extended struts.
 
 
 \begin{figure}[!ht]
     \centering
 
+    \vspace{-0.05in}
+
     \includegraphics[width=\columnwidth]{figures/4-results/ann_map.png}
+
+    \vspace{-0.1in}
 
     \caption{Heat-maps showing the relationship between input and output for the best evolved ANN. For example, the first row represents the output wheel rate for the left wheels, a light shade indicates that the wheel is at its maximum forward rate, and a dark color indicates that it is at its maximal reverse rate. All input and output values are scaled between 0 and 1.}
     \label{fig:ANN-40-2-best-ann-map}
 
-    \vspace{-0.08in}
+    % \vspace{-0.08in}
 
 \end{figure}
 
 
-To summarize our findings regarding the optimization of the Adabot system:
+In summary, regarding the optimization of the Adabot system we found that:
 
 \begin{enumerate}
 
@@ -317,21 +341,21 @@ To summarize our findings regarding the optimization of the Adabot system:
 
 \item The task can be solved by controlling only a single wheel, though, this is likely not a desirable trait. In future work, we plan to add an evolutionary pressure so that the evolved ANNs turn in both directions.
 
-\item Controlling the strut will require a more complex model of the robots dynamics. Once the struts are extended, it is difficult to discern when they can be retracted.
+\item Controlling the strut will require a more complex model of the robots dynamics. Once the struts are extended, it is difficult to discern when they should be retracted.
 
 \end{enumerate}
 
-Taking these observations into account, we developed a hybrid two-state controller. The controller is in \emph{LeftState} when $\alpha_{\mathit{target}}$ is greater than zero and in \emph{RightState} otherwise. Equations for these states are as follows:
+Taking these observations into account, we developed a hybrid two-state controller. The controller is in \emph{Left} when $\alpha_{\mathit{target}}$ is greater than zero and in \emph{Right} otherwise. Equations for these states are as follows:
 
-\vspace{-0.1in}
+% \vspace{-0.1in}
 
 \begin{align}
     \alpha_\mathit{scale} &= 2\cdot(1 - \frac{\alpha_{\mathit{target}}}{\pi}) - 1\\
-    \mathit{LeftState}_\mathit{left} &= \mathit{MAXRAD} \cdot \alpha_\mathit{scale}\\
-    \mathit{LeftState}_\mathit{right} &= \mathit{MAXRAD}\\
-    \mathit{RightState}_\mathit{left} &= \mathit{MAXRAD}\\
-    \mathit{RightState}_\mathit{right} &= -\mathit{MAXRAD}\cdot \alpha_\mathit{scale}
+    \mathit{Left}_\mathit{left} &= -\mathit{MAXRAD} \cdot \alpha_\mathit{scale}\\
+    \mathit{Left}_\mathit{right} &= \mathit{MAXRAD}\\
+    \mathit{Right}_\mathit{left} &= \mathit{MAXRAD}\\
+    \mathit{Right}_\mathit{right} &= \mathit{MAXRAD}\cdot \alpha_\mathit{scale}
 \end{align}
 
 \noindent
-where $\alpha_\mathit{scale}$ is $\alpha_{\mathit{target}}$ scaled between 1 and -1 (the sign is flipped). This simple hybrid controller is able to visit all way-points in 9.9 seconds, which is one tenth of a second faster than the evolved controllers reported above. The controller also works well in the presence of obstacles when the struts are extended 10\%. Overall, this hybrid controller provides a smoother motion and good performance. For future work, we intend to evolve this hybrid controller along with a more sophisticated approach to handling strut extension.
+where $\alpha_\mathit{scale}$ is $\alpha_{\mathit{target}}$ scaled between -1 and 1. This simple hybrid controller is able to visit all way-points in 9.9 seconds, which is one tenth of a second faster than the evolved controllers reported above. The controller also works well in the presence of obstacles when the struts are extended 10\%. Overall, this hybrid controller provides a smoother motion and good performance. For future work, we intend to evolve this hybrid controller along with a more sophisticated approach to handling strut extension.

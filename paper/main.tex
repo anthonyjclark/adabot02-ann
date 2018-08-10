@@ -1,45 +1,69 @@
 \RequirePackage[l2tabu, orthodox]{nag}
 \RequirePackage{silence}
-  \WarningFilter{biblatex}{Patching footnotes failed}
-  \WarningFilter{hyperref}{Option `pdflang' has already been used}
-  \WarningFilter{hyperref}{Option `pdfdisplaydoctitle' has already been used}
-  \WarningFilter{hyperref}{Token not allowed in a PDF string}
-  % main.tex: Package biblatex Warning: Field 'prefixnumber' deprecated. Please use 'labelprefix' instead.
-  \WarningFilter{biblatex}{Field 'prefixnumber' deprecated.}
-  \WarningFilter{Fancyhdr}{\headheight is too small}
+  \WarningFilter{nag}{Command}
+%   \WarningFilter{biblatex}{Patching footnotes failed}
+%   \WarningFilter{hyperref}{Option `pdflang' has already been used}
+%   \WarningFilter{hyperref}{Option `pdfdisplaydoctitle' has already been used}
+%   \WarningFilter{hyperref}{Token not allowed in a PDF string}
+%   % main.tex: Package biblatex Warning: Field 'prefixnumber' deprecated. Please use 'labelprefix' instead.
+%   \WarningFilter{biblatex}{Field 'prefixnumber' deprecated.}
+%   \WarningFilter{Fancyhdr}{\headheight is too small}
 
-\documentclass[sigconf,natbib=false,anonymous=true]{acmart}
+% \documentclass[sigconf,natbib=false,anonymous=true]{acmart}
+\documentclass[letterpaper]{article}
+
+\usepackage{natbib,alifeconf}  %% The order is important
+% \setlength{\bibsep}{0pt plus 0.3ex}
+% % ADD THE FOLLOWING COUPLE LINES INTO YOUR PREAMBLE
+% \let\OLDthebibliography\thebibliography
+% \renewcommand\thebibliography[1]{
+%   \OLDthebibliography{#1}
+%   \setlength{\parskip}{0pt}
+%   \setlength{\itemsep}{0pt plus 0.3ex}
+% }
+\let\oldthebibliography\thebibliography
+\let\endoldthebibliography\endthebibliography
+\renewenvironment{thebibliography}[1]{
+  \begin{oldthebibliography}{#1}
+    \setlength{\itemsep}{0em}
+    \setlength{\parskip}{0em}
+}
+{
+  \end{oldthebibliography}
+}
 
 %%% Subliminal refinements towards typographical perfection (1%)
-% \usepackage[stretch=10]{microtype}
+\usepackage[stretch=10]{microtype}
 
 %drt24 hacks
 % Letter paper
-\setlength{\paperheight}{11in}
-\setlength{\paperwidth}{8.5in}
+% \setlength{\paperheight}{11in}
+% \setlength{\paperwidth}{8.5in}
 
 %%% Handle input and output of accented/special characters and modern fonts
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
 
-%%% Better biblatex
-\let\citename\relax
 \usepackage[american]{babel}
-\usepackage{csquotes}
-\usepackage[style=ACM-Reference-Format,
-  abbreviate=true, dateabbrev=true, isbn=true, doi=true, urldate=comp, url=true, eprint=false,
-  maxbibnames=9, minbibnames=9, maxcitenames=1, mincitenames=1,
-  backref=false, backend=biber, language=american, sortcites=true,
-  autocite=inline% , labelnumber=true
-  ]{biblatex}
-% \cite, \parencite, \footcite, \textcite, \autocite
+% \usepackage{csquotes}
 
-\setcounter{biburlnumpenalty}{100}
-\setcounter{biburllcpenalty}{9000}
 
-\addbibresource{references/gecco2018.bib}
-\renewcommand{\bibfont}{\Small}
+%%% Better biblatex
+% \let\citename\relax
+% \usepackage[style=ACM-Reference-Format,
+%   abbreviate=true, dateabbrev=true, isbn=true, doi=true, urldate=comp, url=true, eprint=false,
+%   maxbibnames=9, minbibnames=9, maxcitenames=1, mincitenames=1,
+%   backref=false, backend=biber, language=american, sortcites=true,
+%   autocite=inline% , labelnumber=true
+%   ]{biblatex}
+% % \cite, \parencite, \footcite, \textcite, \autocite
+
+% \setcounter{biburlnumpenalty}{100}
+% \setcounter{biburllcpenalty}{9000}
+
+% \addbibresource{references/refs.bib}
+% \renewcommand{\bibfont}{\Small}
 
 %%% Include todo notes while writing draft (\listoftodos, \todo, \missingfigure)
 \usepackage[color=white]{todonotes}
@@ -67,6 +91,9 @@
 %%% Better math
 \usepackage{amsmath}
 
+%%% Internal references
+\usepackage{hyperref}
+
 
 %%% Colors for tracking changes
 \newcommand{\red}[1]{\textcolor{red}{#1}}
@@ -87,50 +114,61 @@
 
 
 % Copyright
-\setcopyright{rightsretained}
-\acmDOI{10.1145/nnnnnnn.nnnnnnn}
-\acmISBN{978-x-xxxx-xxxx-x/YY/MM}
-\acmConference[GECCO '18]{the Genetic and Evolutionary Computation Conference 2018}{July 15--19, 2018}{Kyoto, Japan}
-\acmYear{2018}
-\copyrightyear{2018}
-\acmArticle{4}
-\acmPrice{15.00}
+% \setcopyright{rightsretained}
+% \acmDOI{10.1145/nnnnnnn.nnnnnnn}
+% \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
+% \acmConference[GECCO '18]{the Genetic and Evolutionary Computation Conference 2018}{July 15--19, 2018}{Kyoto, Japan}
+% \acmYear{2018}
+% \copyrightyear{2018}
+% \acmArticle{4}
+% \acmPrice{15.00}
 
 % Removes citation information below abstract
 % \settopmatter{printacmref=false}
 
 
+% \title{Evolving State Machines and Neural Networks\\for an Autonomous UGV}
+\title{Evolving Controllers for a Transformable Wheel UGV}
+\author{Anthony J. Clark,$^{1}$, Keith A. Cissell,$^{1}$ \and Jared M. Moore$^{2}$ \\
+\mbox{}\\
+$^1$Missouri State University, Springfield, Missouri, USA\\
+$^2$Grand Valley State University, Allendale, Michigan USA\\
+AnthonyClark@MissouriState.edu} % email of corresponding author
+
 \begin{document}
-\title{Evolving State Machines and Neural Networks\\for an Autonomous UGV}
 
-\author{Anthony J. Clark}
-\affiliation{%
-  \institution{Computer Science Department\\Missouri State University}
-  \city{Springfield}
-  \state{Missouri}
-  \country{USA}
-}
-\email{anthonyclark@missouristate.edu}
+\maketitle
 
+% \title{Evolving State Machines and Neural Networks\\for an Autonomous UGV}
 
-\author{Keith A. Cissell}
-\affiliation{%
-  \institution{Computer Science Department\\Missouri State University}
-  \city{Springfield}
-  \state{Missouri}
-  \country{USA}
-}
-\email{keithacissell@gmail.com}
+% \author{Anthony J. Clark}
+% \affiliation{%
+%   \institution{Computer Science Department\\Missouri State University}
+%   \city{Springfield}
+%   \state{Missouri}
+%   \country{USA}
+% }
+% \email{anthonyclark@missouristate.edu}
 
 
-\author{Jared M. Moore}
-\affiliation{%
-  \institution{School of Computing and Information Systems\\Grand Valley State University}
-  \city{Allendale}
-  \state{Michigan}
-  \country{USA}
-}
-\email{moorejar@gvsu.edu}
+% \author{Keith A. Cissell}
+% \affiliation{%
+%   \institution{Computer Science Department\\Missouri State University}
+%   \city{Springfield}
+%   \state{Missouri}
+%   \country{USA}
+% }
+% \email{keithacissell@gmail.com}
+
+
+% \author{Jared M. Moore}
+% \affiliation{%
+%   \institution{School of Computing and Information Systems\\Grand Valley State University}
+%   \city{Allendale}
+%   \state{Michigan}
+%   \country{USA}
+% }
+% \email{moorejar@gvsu.edu}
 
 
 \input{sections/_0-abstract}
@@ -140,36 +178,39 @@
 % http://dl.acm.org/ccs.cfm
 % Please copy and paste the code instead of the example below.
 %
-\begin{CCSXML}
-<ccs2012>
-<concept>
-<concept_id>10010520.10010553.10010554.10010556.10011814</concept_id>
-<concept_desc>Computer systems organization~Evolutionary robotics</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-<concept>
-<concept_id>10010147.10010178.10010213.10010204.10011814</concept_id>
-<concept_desc>Computing methodologies~Evolutionary robotics</concept_desc>
-<concept_significance>300</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10010520.10010553.10010554.10010556.10011814</concept_id>
+% <concept_desc>Computer systems organization~Evolutionary robotics</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10010147.10010178.10010213.10010204.10011814</concept_id>
+% <concept_desc>Computing methodologies~Evolutionary robotics</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
 
-\ccsdesc[500]{Computer systems organization~Evolutionary robotics}
-\ccsdesc[300]{Computing methodologies~Evolutionary robotics}
+% \ccsdesc[500]{Computer systems organization~Evolutionary robotics}
+% \ccsdesc[300]{Computing methodologies~Evolutionary robotics}
 
-\keywords{evolutionary robotics, artificial neural network, finite state machine, adaptive, unmanned ground vehicle}
+% \keywords{evolutionary robotics, artificial neural network, finite state machine, adaptive, unmanned ground vehicle}
 
-\maketitle
 
 \input{sections/_1-introduction}
 \input{sections/_2-related-work}
 \input{sections/_3-adabot}
 \input{sections/_4-results}
 \input{sections/_5-conclusion}
-\input{sections/_6-acknowledgments}
+% \input{sections/_6-acknowledgments}
 
-\printbibliography
+
+\footnotesize
+\bibliographystyle{apalike}
+\bibliography{references/refs} % replace by the name of your .bib file
+% \printbibliography
 
 
 \end{document}

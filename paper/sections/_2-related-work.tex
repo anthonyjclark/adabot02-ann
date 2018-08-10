@@ -1,42 +1,41 @@
 \section{Related Work}
 \label{sec:related-work}
 
-Robots are well suited to tasks that are too mundane, precise, or dangerous for humans.
-%
-Increasingly, autonomous robots are being developed to operate in rugged and dynamic environments.
-%
-Such terrain is particularly difficult for wheeled UGVs, which has prompted the design of many different suspensions and wheel configurations~\autocite{Seeni.Mobility.InTech.2010}.
-%
-The challenge for these devices is to successfully navigate an area without prior knowledge of the obstacles and ground consistency.
-%
-Moreover, robotics engineers must choose values for all free parameters (\eg{}, the chassis and wheel dimensions).
+% \red{Robots are well suited to tasks that are too mundane, precise, or dangerous for humans.
+% %
+% Increasingly, autonomous robots are being developed to operate in rugged and dynamic environments.
+% %
+% Such terrain is particularly difficult for wheeled UGVs, which has prompted the design of many different suspensions and wheel configurations~\citep{Seeni.Mobility.InTech.2010}.
+% %
+% The challenge for these devices is to successfully navigate an area without prior knowledge of the obstacles and ground consistency.
+% %
+% Moreover, robotics engineers must choose values for all free parameters (\eg{}, the chassis and wheel dimensions).}
 
 
 % Evolve UGVs (ER)
-In the field of evolutionary robotics (ER), an evolutionary algorithm (EA) optimizes free variables of a given system~\autocite{Silva.EvolComp.Issues-ER.2016}.
+In the field of evolutionary robotics (ER), an evolutionary algorithm (EA) optimizes free variables of a given system~\citep{Silva.EvolComp.Issues-ER.2016}.
 %
 ER methods have been successfully applied to many different types of robotic systems (aerial, aquatic, walking, etc.).
 %
 % TODO change this citation
-For example, \textcite{Clark.GECCO.MFAC.2015} used differential evolution to evolve an adaptive neural network for a robotic fish, and \textcite{Moore.2017.GECCO.Animat} evolved hierarchical controllers for segmented worm-like animats.
+For example, we have previously used differential evolution to evolve an adaptive neural network for a robotic fish \citep{Clark.GECCO.MFAC.2015}, and \citet{Moore.2017.GECCO.Animat} evolved hierarchical controllers for segmented worm-like animats.
 %
-Although evolution has been regularly utilized at an abstract level to optimize wheeled-robot navigation processes (for example, see~\autocite{Gomes.2015.GECCO.Maze}), it has not often been used to directly evolve UGVs.
+Although evolution has been regularly utilized at an abstract level to optimize wheeled-robot navigation processes (for example, see~\citet{Gomes.2015.GECCO.Maze}), it has not often been used to directly evolve UGVs, and to the best of our knowledge this is the first study in which the characteristics of a transformable wheel are evolved.
 %
-However, as identified by \textcite{Bongard.2013.CACM.ER}, and in the work presented here, ER methods can be effectively applied to wheeled robots.
+% However, as identified by \citet{Bongard.2013.CACM.ER}, and in the work presented here, ER methods can be effectively applied to wheeled robots.
 
 
 % Analyze neural networks
-A large number of ER studies utilize ANNs to control mobile robots. This includes \textcite{Sims.1994.CGIT.Creatures}  \emph{Evolving Virtual Creatures}, which is considered one the the first ER works.
+A large number of ER studies utilize ANNs to control mobile robots, including \emph{Evolving Virtual Creatures} \citep{Sims.1994.CGIT.Creatures}, which is considered one the the first ER works.
 %
 ANNs  provide several benefits when using an evolutionary method.
 %
-First, since ANNs are so-called universal approximators~\autocite{Hornik.1989.NN.UniversalANN}, evolution often produces \emph{novel} and sometimes unintuitive results that may not have been found when creating a controller by hand~\autocite{Bongard.2013.CACM.ER}.
+First, since ANNs are so-called universal approximators~\citep{Hornik.1989.NN.UniversalANN}, evolution often produces \emph{novel} and sometimes unintuitive results that may not have been found when creating a controller by hand~\citep{Bongard.2013.CACM.ER}.
 %
-And second, ANNs require a minimal amount of user design. Specifically, an evolutionary algorithm can automatically decide the importance of each input (sensor values) in the calculation of each output (actuation mechanisms)~\autocite{Stanley.2002.EC.NEAT}.
+And second, ANNs require a minimal amount of user design. Specifically, an evolutionary algorithm can automatically decide the importance of each input (sensor values) in the calculation of each output (actuation mechanisms)~\citep{Stanley.2002.EC.NEAT}.
 %
 The primary disadvantage of using an ANN is that it is considered a black-box system. That is, \emph{how} an ANN achieves its results is not often clear or analyzed.
 %
-% TODO replace this reference with SSCI when I can get it
-Recently, however, some researchers have attempted to extract state machines from evolved neural networks~\autocite{Wrobel.2017.SSCI.VSSNN}.
+Recently, however, some researchers have attempted to extract state machines from evolved neural networks.
 %
-In the aforementioned study, \textcite{Wrobel.2017.SSCI.VSSNN} automatically created a state machine with the same properties of an evolved spiking neural network.
+For example, \citet{Wrobel.2017.SSCI.VSSNN} automatically generated a state machine with the same properties of an evolved spiking neural network.

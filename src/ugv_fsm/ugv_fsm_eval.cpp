@@ -1,8 +1,7 @@
 
 
-#ifdef VISUALIZE
-    #include "../../logger/cpp/logger.hpp"
-#endif
+#include "../../logger/cpp/logger.hpp"
+
 
 #include "../extras/pd_controller.hpp"
 #include "../extras/utilities.hpp"
@@ -153,7 +152,7 @@ auto create_random_box(double ugv_density, size_t rseed)
     static std::uniform_real_distribution<double> uni_real_density(0.5, 1.5);
 
     // Make sure that obstacles don't fall on the robot
-    static const std::array<double, 4> intervals{{-100_cm, -24_cm, 24_cm, 100_cm}};
+    static const std::array<double, 4> intervals{{-250_cm, -24_cm, 24_cm, 250_cm}};
     static const std::array<double, 3> weights{{1, 0, 1}};
     static std::piecewise_constant_distribution<double> uni_real_xz_trans(
         intervals.begin(), intervals.end(), weights.begin());
@@ -202,28 +201,26 @@ auto create_random_box(double ugv_density, size_t rseed)
 }
 
 
-#ifdef VISUALIZE
-    void add_frame_to_rl(revisit::logger & logger, WorldPtr & world, double scale) {
+void add_frame_to_rl(revisit::logger & logger, WorldPtr & world, double scale) {
 
-        logger.new_frame();
+    logger.new_frame();
 
-        for (size_t skel_idx = 0; skel_idx < world->getNumSkeletons(); ++skel_idx) {
+    for (size_t skel_idx = 0; skel_idx < world->getNumSkeletons(); ++skel_idx) {
 
-            auto skel = world->getSkeleton(skel_idx);
-            for (const auto & bnode : skel->getBodyNodes()) {
+        auto skel = world->getSkeleton(skel_idx);
+        for (const auto & bnode : skel->getBodyNodes()) {
 
-                auto T = bnode->getTransform();
-                auto trans = T.translation() * scale;
-                Quaterniond quat(T.rotation());
+            auto T = bnode->getTransform();
+            auto trans = T.translation() * scale;
+            Quaterniond quat(T.rotation());
 
-                logger.add_to_frame(
-                    bnode->getName(),
-                    trans.x(), trans.y(), trans.z(),
-                    quat.x(), quat.y(), quat.z(), quat.w());
-            }
+            logger.add_to_frame(
+                bnode->getName(),
+                trans.x(), trans.y(), trans.z(),
+                quat.x(), quat.y(), quat.z(), quat.w());
         }
     }
-#endif
+}
 
 
 int main(int argc, char const *argv[])
@@ -250,9 +247,7 @@ int main(int argc, char const *argv[])
     double TIME_STOP;
     iss >> TIME_STOP;
 
-#ifdef VISUALIZE
     cerr << "TIME_STOP " << TIME_STOP;
-#endif
 
     constexpr double TIME_STEP = 0.005;
 
@@ -260,17 +255,13 @@ int main(int argc, char const *argv[])
     size_t num_obstacles, obstacle_seed;
     iss >> num_obstacles >> obstacle_seed;
 
-#ifdef VISUALIZE
     cerr << "\nnum_obstacles " << num_obstacles << "\nobstacle_seed " << obstacle_seed;
-#endif
 
     // Chassis parameters
     double wheel_base, track_width;
     iss >> wheel_base >> track_width;
 
-#ifdef VISUALIZE
     cerr << "\nwheel_base " << wheel_base  << "\ntrack_width " << track_width;
-#endif
 
     constexpr double chassis_height = 3_cm;
     const string chassis_name{"chassis"};
@@ -280,25 +271,67 @@ int main(int argc, char const *argv[])
     double wheel_radius;
     iss >> wheel_radius;
 
-#ifdef VISUALIZE
     cerr << "\nwheel_radius " << wheel_radius;
-#endif
 
     constexpr double wheel_thickness = 1.5_cm;
     const Vector3d wheel_dimensions{wheel_radius * 2, wheel_radius * 2, wheel_thickness};
 
     // Weg parameters
     size_t weg_count;
-    iss >> weg_count;
+    double weg_extension_slope, weg_extension_intercept;
+    iss >> weg_count >> weg_extension_slope >> weg_extension_intercept;
 
-#ifdef VISUALIZE
-    cerr << "\nweg_count " << weg_count << endl;
-#endif
+    cerr << "\nweg_count " << weg_count
+         << "\nweg_extension_slope " << weg_extension_slope
+         << "\nweg_extension_intercept " << weg_extension_intercept;
 
     constexpr double weg_radius = 0.25_cm;
 
+    // FSM parameters
+    double forward_speed_scale;
+    double forward_to_left_lo;//, forward_to_left_hi;
+    double /*forward_to_right_lo,*/ forward_to_right_hi;
 
-#ifdef VISUALIZE
+    iss >> forward_speed_scale
+        // >> forward_right
+        >> forward_to_left_lo
+        // >> forward_to_left_hi
+        // >> forward_to_right_lo
+        >> forward_to_right_hi;
+
+    cerr << "\nforward_speed_scale " << forward_speed_scale
+         // << "\nforward_right " << forward_right
+         << "\nforward_to_left_lo " << forward_to_left_lo * 180 / 3.145926
+    //      << "\nforward_to_left_hi " << forward_to_left_hi
+    //      << "\nforward_to_right_lo " << forward_to_right_lo
+         << "\nforward_to_right_hi " << forward_to_right_hi * 180 / 3.145926;
+
+    double left_left_scale, left_right_scale;
+    double /*left_to_forward_lo,*/ left_to_forward_hi;
+
+    iss >> left_left_scale
+        >> left_right_scale
+        // >> left_to_forward_lo
+        >> left_to_forward_hi;
+
+    cerr << "\nleft_left " << left_left_scale
+         << "\nleft_right " << left_right_scale
+    //      << "\nleft_to_forward_lo " << left_to_forward_lo
+         << "\nleft_to_forward_hi " << left_to_forward_hi * 180 / 3.145926;
+
+    double right_left_scale, right_right_scale;
+    double right_to_forward_lo;//, right_to_forward_hi;
+
+    iss >> right_left_scale
+        >> right_right_scale
+        >> right_to_forward_lo;
+        // >> right_to_forward_hi;
+
+    cerr << "\nright_left " << right_left_scale
+         << "\nright_right " << right_right_scale
+         << "\nright_to_forward_lo " << right_to_forward_lo * 180 / 3.145926 << endl;
+    //      << "\nright_to_forward_hi " << right_to_forward_hi << endl;
+
 
     constexpr double VIS_STEP = 1.0 / 10.0;
     constexpr double VIS_SCALE = 10;
@@ -309,7 +342,6 @@ int main(int argc, char const *argv[])
     //
 
     revisit::logger rl(VIS_STEP, TIME_STOP);
-#endif
 
 
     //
@@ -329,12 +361,10 @@ int main(int argc, char const *argv[])
         chassis_dimensions, material_density, material_restitution);
 
 
-#ifdef VISUALIZE
     rl.add_box(chassis_name,
         chassis_dimensions.x() * VIS_SCALE,
         chassis_dimensions.y() * VIS_SCALE,
         chassis_dimensions.z() * VIS_SCALE);
-#endif
 
 
     //
@@ -365,21 +395,17 @@ int main(int argc, char const *argv[])
         add_wheel(ugv, wheel_props);
         wheel_idxs.push_back(ugv->getDof(name + "_joint")->getIndexInSkeleton());
 
-#ifdef VISUALIZE
         rl.add_ellipsoid(name,
             wheel_dimensions.x() * VIS_SCALE,
             wheel_dimensions.y() * VIS_SCALE,
             wheel_dimensions.z() * VIS_SCALE);
-#endif
 
         for (size_t weg_idx = 0; weg_idx < weg_count; ++weg_idx) {
             auto weg_name = name + "_weg_joint" + std::to_string(weg_idx);
             weg_idxs.push_back(ugv->getDof(weg_name)->getIndexInSkeleton());
             weg_joint_names.push_back(weg_name);
 
-#ifdef VISUALIZE
             rl.add_sphere(name + "_weg" + std::to_string(weg_idx), weg_radius * VIS_SCALE);
-#endif
         }
     }
 
@@ -426,6 +452,8 @@ int main(int argc, char const *argv[])
     auto collisionEngine = world->getConstraintSolver()->getCollisionDetector();
     auto collisionGroup = world->getConstraintSolver()->getCollisionGroup();
 
+    auto numObstaclesAdded = 0ul;
+
     for (size_t obs_idx = 0; obs_idx < num_obstacles; ++obs_idx) {
         SkeletonPtr skel;
         Vector3d dims;
@@ -443,15 +471,16 @@ int main(int argc, char const *argv[])
         if(!collision) {
             world->addSkeleton(skel);
 
+            ++numObstaclesAdded;
 
-#ifdef VISUALIZE
             rl.add_box(name,
                 dims.x() * VIS_SCALE,
                 dims.y() * VIS_SCALE,
                 dims.z() * VIS_SCALE);
-#endif
         }
     }
+
+    cerr << "Number of obstacles : " << numObstaclesAdded << endl;
 
 
     // The Bullet collision detector uses primitives instead of meshes, which makes
@@ -474,6 +503,60 @@ int main(int argc, char const *argv[])
     // The PD controller can be reused by all wegs
     PDController weg_pd{1, 0.1, TIME_STEP};
 
+    // Direction controller
+    struct State {
+        std::string name;
+        double left_speed, right_speed;
+        double to_left_lo, to_left_hi;
+        double to_right_lo, to_right_hi;
+        double to_forward_lo, to_forward_hi;
+
+        std::string transition(double angle) {
+            if (to_left_lo < angle && angle < to_left_hi) {
+                return "left";
+            } else if (to_right_lo < angle && angle < to_right_hi) {
+                return "right";
+            } else if (to_forward_lo < angle && angle < to_forward_hi) {
+                return "forward";
+            } else {
+                return name;
+            }
+        }
+    };
+
+    // double max_speed = 10;
+    // std::unordered_map<std::string, State> fsm{{
+    //     {"forward", {"forward", -max_speed, -max_speed, 10_deg, 2_pi, -2_pi, -10_deg,      1,    -1}},
+    //     {"left",    {"left",     max_speed, -max_speed,       1,  -1,     1,      -1,  -2_pi, 5_deg}},
+    //     {"right",   {"right",   -max_speed,  max_speed,       1,  -1,     1,      -1, -5_deg,  2_pi}},
+    // }};
+
+    std::unordered_map<std::string, State> fsm{{
+        {"forward", {"forward",
+            -MAX_ABS_RADS * forward_speed_scale,
+            -MAX_ABS_RADS * forward_speed_scale,
+            forward_to_left_lo, 2_pi,
+            -2_pi, forward_to_right_hi,
+            1, -1}
+        },
+        {"left",    {"left",
+            -MAX_ABS_RADS * left_left_scale,
+            -MAX_ABS_RADS * left_right_scale,
+            1, -1,
+            1, -1,
+            -2_pi, left_to_forward_hi}
+        },
+        {"right",   {"right",
+            -MAX_ABS_RADS * right_left_scale,
+            -MAX_ABS_RADS * right_right_scale,
+            1, -1,
+            1, -1,
+            right_to_forward_lo, 2_pi}
+        }
+    }};
+
+    std::string state("forward");
+
 
     //
     // Simulate the world for some amount of time
@@ -485,23 +568,19 @@ int main(int argc, char const *argv[])
     constexpr double CONTROL_STEP = 0.1;
 
 
-#ifdef VISUALIZE
     double next_vis_output_time = 0;
     rl.add_sphere("target", 5_cm * VIS_SCALE);
-#endif
 
     vector<Vector3d> targets{
-        {-50_cm, 0,  50_cm},
-        { 50_cm, 0,  50_cm},
-        {-50_cm, 0, -50_cm},
-        { 50_cm, 0, -50_cm},
+        {-200_cm, 0,  200_cm},
+        { 200_cm, 0,  200_cm},
+        {-200_cm, 0, -200_cm},
+        { 200_cm, 0, -200_cm},
     };
 
     size_t target_idx = 0;
     double target_dist = 0.0;
-#ifdef VISUALIZE
     bool update_target = true;
-#endif
 
     double left_speed = 0;
     double right_speed = 0;
@@ -511,10 +590,9 @@ int main(int argc, char const *argv[])
     double linear_speed_error = 0;
     double alpha = 0.25;
 
-#ifdef VISUALIZE
     cout << "time angle_scaled angular_speed_error_scaled linear_speed_error_scaled"
-            " left_speed right_speed weg_extension target_idx x y z angle_norm\n";
-#endif
+            " left_speed right_speed weg_extension target_idx x y z";
+    cout << " state" << endl;
 
     while (world->getTime() < TIME_STOP + TIME_STEP/2.0) {
 
@@ -535,13 +613,12 @@ int main(int argc, char const *argv[])
             auto Vn = Vector3d(0, 1, 0);
 
             auto angle = std::atan2(Va.cross(Vb).dot(Vn), Va.dot(Vb));
+            state = fsm[state].transition(angle);
 
             target_dist = (chassis_pos - targets[target_idx]).norm();
 
             if (target_dist < 8_cm) {
-#ifdef VISUALIZE
                 update_target = true;
-#endif
                 if (++target_idx >= targets.size()) {
                     break;
                 }
@@ -569,13 +646,11 @@ int main(int argc, char const *argv[])
             double angular_speed_error_scaled = angular_speed_error / max_abs_angular_speed;
             double linear_speed_error_scaled = linear_speed_error / max_abs_linear_speed;
 
-            // double w_angular = weg_extension_slope * abs(angular_speed_error_scaled) + weg_extension_intercept;
-            // double w_linear = weg_extension_slope * abs(linear_speed_error_scaled) + weg_extension_intercept;
-            // double w = max(
-            //     min(1.0, max(0.0, w_angular)),
-            //     min(1.0, max(0.0, w_linear)));
-
-            double w = 0.05;
+            double w_angular = weg_extension_slope * abs(angular_speed_error_scaled) + weg_extension_intercept;
+            double w_linear = weg_extension_slope * abs(linear_speed_error_scaled) + weg_extension_intercept;
+            double w = max(
+                min(1.0, max(0.0, w_angular)),
+                min(1.0, max(0.0, w_linear)));
 
             const double max_w = wheel_radius - 1_cm;
             weg_extension = w * max_w;
@@ -584,17 +659,9 @@ int main(int argc, char const *argv[])
             double w_speed_scale_factor = 1.0 - (w / 1.25);
             const double max_rads = MAX_ABS_RADS * w_speed_scale_factor;
 
-            double angle_norm = angle / 1_pi;
+            left_speed = max(-max_rads, min(max_rads, fsm[state].left_speed));
+            right_speed = max(-max_rads, min(max_rads, fsm[state].right_speed));
 
-            if (angle_norm > 0) {
-                left_speed = -max_rads * (((1 - abs(angle_norm)) * 2) - 1);
-                right_speed = -max_rads;
-            } else {
-                left_speed = -max_rads;
-                right_speed = -max_rads * (((1 - abs(angle_norm)) * 2) - 1);
-            }
-
-#ifdef VISUALIZE
             double angle_scaled = (angle + 1_pi) / 2_pi;
             cout << world->getTime()
                  << " " << angle_scaled
@@ -607,9 +674,8 @@ int main(int argc, char const *argv[])
                  << " " << chassis_pos.x()
                  << " " << chassis_pos.y()
                  << " " << chassis_pos.z()
-                 << " " << angle_norm
+                 << " " << state
                  << endl;
-#endif
         }
 
         ugv->setCommand(wheel_idxs.at(0), right_speed);
@@ -630,7 +696,6 @@ int main(int argc, char const *argv[])
         }
 
 
-#ifdef VISUALIZE
         if (world->getTime() > next_vis_output_time) {
             add_frame_to_rl(rl, world, VIS_SCALE);
             if (update_target) {
@@ -643,14 +708,12 @@ int main(int argc, char const *argv[])
             }
             next_vis_output_time += VIS_STEP;
         }
-#endif
 
     }
 
     // zero target_dist if all 4 targets have been reached
     target_dist = target_idx >= targets.size() ? 0 : target_dist;
 
-#ifdef VISUALIZE
     rl.log_data_["duration"] = (rl.log_data_["frames"].size() - 1) * VIS_STEP;
     // Passing false prints a compact JSON representation
     cout << rl.to_string(false) << endl;
@@ -658,11 +721,6 @@ int main(int argc, char const *argv[])
     cerr << "Targets reached : " << target_idx << endl;
     cerr << "Dist to next    : " << target_dist << endl;
     cerr << "Time remaining  : " << std::max(0.0, TIME_STOP - world->getTime()) << endl;
-#else
-    cout << target_idx
-         << "," << target_dist
-         << "," << std::max(0.0, TIME_STOP - world->getTime()) << endl;
-#endif
 
     return EXIT_SUCCESS;
 }

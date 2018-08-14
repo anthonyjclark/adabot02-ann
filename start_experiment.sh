@@ -6,10 +6,10 @@ set -e
 
 
 
-if [[ "$1" == "fsm" || "$1" == "bnn" ]]; then
+if [[ "$1" == "fsm" || "$1" == "bnn" || "$1" == "bnn_twist" ]]; then
     BIN_NAME="$1"
 else
-    echo "First argument (valid experiments): fsm|bnn" >&2; exit 1;
+    echo "First argument (valid experiments): fsm|bnn|bnn_twist" >&2; exit 1;
 fi
 
 if [[ -n "$2" && $2 =~ ^[0-9]+$ ]]; then

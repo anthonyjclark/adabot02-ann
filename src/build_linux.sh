@@ -11,11 +11,11 @@ BIN_DIR="bin"
 INC_DIRS="-isystem /usr/include/eigen3 -isystem $HOME/.local/include -isystem /usr/include/bullet"
 LIB_DIRS=""
 # LIBS="/usr/lib/libdart.so.6.3.0 -lassimp -lboost_system -lBulletCollision -lLinearMath -ldart-collision-bullet"
-LIBS="/usr/lib/libdart.so.6.3.0 \
+LIBS="/usr/lib/libdart.so.6.4.0 \
       -lassimp -lboost_system \
       /usr/lib/x86_64-linux-gnu/libBulletCollision.so.2.83 \
       /usr/lib/x86_64-linux-gnu/libLinearMath.so.2.83 \
-      /usr/lib/libdart-collision-bullet.so.6.3.0"
+      /usr/lib/libdart-collision-bullet.so.6.4.0"
 
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DYLIB_DIR
 
@@ -85,6 +85,8 @@ case "$1" in
         build "ugv_fsm" "VISUALIZE"
         build "ugv_bnn"
         build "ugv_bnn" "VISUALIZE"
+        build "ugv_bnn_twist"
+        build "ugv_bnn_twist" "VISUALIZE"
         ;;
 
     brun )

@@ -1,0 +1,13 @@
+{
+    "folders":
+    [
+        {
+            "path": "."
+        }
+    ],
+
+    "settings": {
+        "TEXroot": "main.tex",
+        "output_directory": "generated_files",
+    }
+}

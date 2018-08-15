@@ -22,21 +22,21 @@ function erun () {
 
 
 function compile () {
-    if [ -z "$2" ]; then
+    if [ -z "$3" ]; then
         DEF=""
-        BIN_NAME=$BIN_DIR/$1
+        BIN_NAME=$BIN_DIR/$2
     else
-        DEF="-D$2"
-        BIN_NAME=$BIN_DIR/$1_vis
+        DEF="-D$3"
+        BIN_NAME=$BIN_DIR/$2_vis
     fi
-    erun $COMPILER $CPP_FLAGS $LD_FLAGS $INC_DIRS $LIB_DIRS $LIBS $1/$1.cpp -o $BIN_NAME $DEF
+    erun $COMPILER $CPP_FLAGS $LD_FLAGS $INC_DIRS $LIB_DIRS $LIBS $1/$2.cpp -o $BIN_NAME $DEF
 }
 
 
 
 function build () {
     if [ -d "$1" ]; then
-        compile "$1" "$2"
+        compile "$1" "$1" "$2"
     else
         printf "Error: could not find \"""$1""\"\n"
     fi
@@ -65,6 +65,14 @@ case "$1" in
 
     build )
         build ${2%/} "$3"
+        ;;
+
+    eval )
+        if [ -d "$2" ]; then
+            compile "$2" "$2"_eval
+        else
+            printf "Error: could not find \"""$1""\"\n"
+        fi
         ;;
 
     run )

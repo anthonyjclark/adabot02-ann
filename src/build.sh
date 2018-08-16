@@ -69,7 +69,7 @@ case "$1" in
 
     eval )
         if [ -d "$2" ]; then
-            compile "$2" "$2"_eval
+            compile "$2" "$2"_eval "$3"
         else
             printf "Error: could not find \"""$1""\"\n"
         fi

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-import cma
-from cma.fitness_transformations import EvalParallel
-
 import random
 import subprocess as sp
 from math import pi, floor, log10
@@ -110,6 +107,10 @@ def ugv_sim(args, print_command=False):
 
 
 def evolve(initial_genome, seed):
+
+    import cma
+    from cma.fitness_transformations import EvalParallel
+
     random.seed(seed)
     cma_options = {
         'seed': seed,
@@ -140,6 +141,7 @@ if __name__ == '__main__':
 
     argparser.add_argument('--args', type=str, help='A UGV args string to evaluate.')
     argparser.add_argument('--genome', type=str, help='Evaluate the given genome.')
+    argparser.add_argument('--genome_to_args', type=str, help='Return arg string.')
 
     prog_args = argparser.parse_args()
 
@@ -161,5 +163,8 @@ if __name__ == '__main__':
     elif prog_args.genome != None:
         given_genome = [float(g) for g in prog_args.genome.split(' ')]
         print('Fitness', ugv_sim(genome_to_args(given_genome), print_command=True))
+    elif prog_args.genome_to_args != None:
+        given_genome = [float(g) for g in prog_args.genome_to_args.split(' ')]
+        print(genome_to_args(given_genome))
     else:
         print('Fitness', ugv_sim(genome_to_args(default_genome), print_command=True))

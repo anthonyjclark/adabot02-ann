@@ -66,3 +66,4 @@ git pull
 
 - template NN and BNN
 - really need to convert UGV to a class (tons of code duplication)
+- refactor controllers into separate files

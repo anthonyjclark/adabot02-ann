@@ -328,9 +328,14 @@ int main(int argc, char const *argv[])
 
     BNN bnn(NI, NO, weights, ACT);
     Eigen::MatrixXd nn_input(1, NI);
-    // angle to target
-    // linear speed error
-    // angular speed error
+    // Input:
+    //      angle to target
+    //      linear speed error
+    //      angular speed error
+    // Output:
+    //      linear speed
+    //      angular speed
+    //      weg extension amount
 
 
 #ifdef VISUALIZE
@@ -626,9 +631,21 @@ int main(int argc, char const *argv[])
             Eigen::MatrixXd nn_output = bnn.activate(nn_input);
             Eigen::MatrixXd nn_output_clamped = nn_output.array().min(1).max(0);
 
-            double l = nn_output_clamped(0);
-            double r = nn_output_clamped(1);
+            // --- Gazebo ---
+            // double vr, va;
+            // vr = _msg->position().x();
+            // va =  msgs::ConvertIgn(_msg->orientation()).Euler().Z();
+            // this->wheelSpeed[LEFT] = vr + va * this->wheelSeparation / 2.0;
+            // this->wheelSpeed[RIGHT] = vr - va * this->wheelSeparation / 2.0;
+
+            // double l = nn_output_clamped(0);
+            // double r = nn_output_clamped(1);
+            double vr = nn_output_clamped(0) * 2.0 - 1.0;
+            double va = nn_output_clamped(1) * 2.0 - 1.0;
             double w = nn_output_clamped(2);
+
+            double l = vr + va;// * track_width / 2.0;
+            double r = vr - va;// * track_width / 2.0;
 
             const double max_w = wheel_radius - 1_cm;
             constexpr double min_s = -MAX_ABS_RADS;

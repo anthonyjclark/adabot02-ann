@@ -67,3 +67,6 @@ git pull
 - template NN and BNN
 - really need to convert UGV to a class (tons of code duplication)
 - refactor controllers into separate files
+
+
+- Get good trajectory/visualization controllers from evaluate runs (note the seed even though the spacing will be different).

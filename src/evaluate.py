@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from multiprocessing import Pool
 from pathlib import Path
 from subprocess import PIPE, run
 
@@ -77,6 +78,14 @@ def get_args_from_individuals(individuals, exp_name, max_time, num_obst):
     return eval_inputs
 
 
+def run_eval(cmd):
+    try:
+        cmd_output = run(cmd, stdout=PIPE, check=True, timeout=120).stdout.decode('utf-8').strip()
+    except Exception as e:
+        cmd_output = 'error'
+    return ','.join(cmd[1].split()) + ',' + cmd_output
+
+
 def evaluate(args, num_trials, exp_name):
     if 'fsm' in exp_name:
         eval_bin = 'bin/ugv_fsm_eval'
@@ -86,11 +95,23 @@ def evaluate(args, num_trials, exp_name):
         eval_bin = 'bin/ugv_bnn_eval'
 
     for arg in args:
+
+        cmds = []
         for trial in range(num_trials):
-            arg[2] = str(trial)
-            run_cmd = [eval_bin, ' '.join(arg)]
-            proc_output = run(run_cmd, stdout=PIPE, check=True).stdout.decode('utf-8').strip()
-            print(','.join(arg) + ',' + proc_output)
+            new_arg = arg.copy()
+            new_arg[2] = str(trial)
+            cmds.append([eval_bin, ' '.join(new_arg)])
+
+        with Pool(processes=num_trials) as pool:
+            result = pool.map(run_eval, cmds)
+
+        print('\n'.join(result))
+
+        # for trial in range(num_trials):
+        #     arg[2] = str(trial)
+        #     run_cmd = [eval_bin, ' '.join(arg)]
+        #     proc_output = run(run_cmd, stdout=PIPE, check=True).stdout.decode('utf-8').strip()
+        #     print(','.join(arg) + ',' + proc_output)
 
 
 if __name__ == '__main__':

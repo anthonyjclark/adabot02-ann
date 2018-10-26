@@ -61,11 +61,11 @@ This experiment serves as a convenient baseline with which the others can be com
 \begin{figure}[!ht]
     \centering
 
-    \includegraphics[width=\columnwidth]{figures/4-results/fitness.png}
+    \includegraphics[width=\columnwidth]{figures/4-results/fitness-without.png}
 
     %\vspace{-0.1in}
 
-    \caption{Plots for the maximum fitness found in each of the four experiments. Shaded regions indicate confidence intervals of one standard deviation from the mean for the 20 replicates of each experiment. The maximum possible fitness is 10, and fitness values above 2 indicate that Adabot was able to reach at least one way-point.}
+    \caption{Plots for the maximum fitness found in the two experiments without obstacles. Shaded regions indicate confidence intervals of one standard deviation from the mean for the 20 replicates of each experiment. The maximum possible fitness is 10, and fitness values above 2 indicate that Adabot was able to reach at least one way-point.}
     \label{fig:fitness-vs-iteration}
 
     %\vspace{-0.1in}
@@ -172,7 +172,11 @@ Specifically, the threshold values and speeds evolved for the \emph{Left} and \e
     % \hfil
     % \subfloat[]{\includegraphics[width=\textwidth]{figures/4-results/FSM-40-2-best_params.png}}
 
-    \includegraphics[width=\textwidth]{figures/4-results/FSM-0-1-best_params.png}
+    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/fsm01-strut-forward.png}}
+
+    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/fsm01-left-right.png}}
+
+
 
     %\vspace{-0.08in}
 
@@ -196,13 +200,24 @@ These experiments differ from the previous two in two respects. First, each fitn
 %
 Utilizing multiple trials during fitness evaluations improves the robustness of the evolved results~\citep{Ruud.SSCI.EvoLearn.2016}.
 %
-The fitness plots for these experiments appear in \figref{fig:fitness-vs-iteration}.
+The fitness plots for these experiments appear in \figref{fig:fitness-vs-iteration-obst}.
 %
 Of note is that the ANNs evolved with obstacles have a greatly reduced maximum fitness. A few individuals achieve a fitness above 9, however, we found that this was only when the randomly generated environment did not pose much difficulty.
 %
 Videos (and interactive animations) for high fitness individuals can be found here: \emph{FSM-40-2}: \url{https://youtu.be/VXnrwwpE598} (\url{https://goo.gl/NtoVYe}); and \emph{ANN-40-2}: \url{https://youtu.be/q8PFqQps5e4} (\url{https://goo.gl/2xjh6X}).
 %
 % We have provided videos for the highest fitness individuals from both experiments: \emph{FSM-40-2} example behavior: \url{https://youtu.be/VXnrwwpE598}; and \emph{ANN-40-2} example behavior: \url{https://youtu.be/q8PFqQps5e4}.
+
+
+\begin{figure}[!ht]
+    \centering
+
+    \includegraphics[width=\columnwidth]{figures/4-results/fitness-with.png}
+
+    \caption{Plots for the maximum fitness found in the two experiments including obstacles. Shaded regions indicate confidence intervals of one standard deviation from the mean for the 20 replicates of each experiment. The maximum possible fitness is 10, and fitness values above 2 indicate that Adabot was able to reach at least one way-point.}
+    \label{fig:fitness-vs-iteration-obst}
+
+\end{figure}
 
 
 % After reviewing the distributions in Figures~\ref{fig:0-1-best-params} and~\ref{fig:40-2-best-params}
@@ -329,6 +344,25 @@ We have identified two sources of error with the simple model: (1) it does not t
     % %\vspace{-0.08in}
 
 \end{figure}
+
+
+For our final comparison between these two control models, we took five best performing individuals from each replicate experiment and evaluated them on three new environments. The new environments required the mobile robot to drive four times further and handle twice as many obstacles. The simulation time was also increase from 30 s to 90 s.
+%
+Results from these evaluations are shown in Figure~\ref{fig:evaluation}.
+%
+As shown in the figure, the FSM controllers were still on average able to reach two way-points, while the ANN controllers frequently failed to reach even one.
+
+
+\begin{figure}[!ht]
+    \centering
+
+    \includegraphics[width=\columnwidth]{figures/4-results/evaluation.png}
+
+    \caption{The best evolved controllers from each replicate were evaluated in new environments. FSM controllers were still able to reach some way-points, but most ANN controllers failed to reach even one.}
+    \label{fig:evaluation}
+
+\end{figure}
+
 
 
 In summary, regarding the optimization of the Adabot system we found that:

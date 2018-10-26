@@ -16,7 +16,7 @@
 %
 The Adabot, pictured in \figref{fig:adabot}, is a prototype device that includes a Raspberry Pi 3 Model B (RPi) as its main control board.
 %
-The RPi was chosen for its ability to run the Robot Operating System (ROS)~\citep{Quigley.ICRAOSS.ROS.2009}, which Adabot uses to deploy its software systems.
+The RPi was chosen for its ability to run the Robot Operating System (ROS)~\citep{Quigley.ICRAOSS.ROS.2009,Cousins.2010.IRAM.WelcomeROSTopics}, which Adabot uses to deploy its software systems.
 %
 The size of an RPi constrains the minimum dimensions of the Adabot's chassis. Specifically, the chassis must be at minimum 8~\si{cm} by 8~\si{cm}.
 %
@@ -108,7 +108,7 @@ The environment is populated by generating 40 boxes with random dimensions, posi
 %
 If a newly generated box collides with an existing box it is removed from the simulation. We see on average 31 boxes placed in the environment.
 %
-Box heights range from \numrange{2}{5}~\si{cm}, which is high enough (compared to $\mathit{WheelRadius}$ values) to drastically reduce mobility for a wheeled robot~\citep{Quinn.IROS.Whegs.2002}.
+Box heights range from \numrange{2}{5}~\si{cm}, which is high enough (compared to $\mathit{WheelRadius}$ values) to drastically reduce mobility for a wheeled robot~\citep{Quinn.2003.IJRR.ParallelComplementaryStrategies}.
 %
 Moreover, rather than each box being in a fixed position, it is possible for the Adabot to push a box (depending on its size and density).
 

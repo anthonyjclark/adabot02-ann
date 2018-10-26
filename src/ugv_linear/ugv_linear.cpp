@@ -153,7 +153,7 @@ auto create_random_box(double ugv_density, size_t rseed)
     static std::uniform_real_distribution<double> uni_real_density(0.5, 1.5);
 
     // Make sure that obstacles don't fall on the robot
-    static const std::array<double, 4> intervals{{-100_cm, -24_cm, 24_cm, 100_cm}};
+    static const std::array<double, 4> intervals{{-250_cm, -24_cm, 24_cm, 250_cm}};
     static const std::array<double, 3> weights{{1, 0, 1}};
     static std::piecewise_constant_distribution<double> uni_real_xz_trans(
         intervals.begin(), intervals.end(), weights.begin());
@@ -426,6 +426,8 @@ int main(int argc, char const *argv[])
     auto collisionEngine = world->getConstraintSolver()->getCollisionDetector();
     auto collisionGroup = world->getConstraintSolver()->getCollisionGroup();
 
+    auto numObstaclesAdded = 0ul;
+
     for (size_t obs_idx = 0; obs_idx < num_obstacles; ++obs_idx) {
         SkeletonPtr skel;
         Vector3d dims;
@@ -443,6 +445,7 @@ int main(int argc, char const *argv[])
         if(!collision) {
             world->addSkeleton(skel);
 
+            ++numObstaclesAdded;
 
 #ifdef VISUALIZE
             rl.add_box(name,
@@ -453,6 +456,9 @@ int main(int argc, char const *argv[])
         }
     }
 
+#ifdef VISUALIZE
+    cerr << "Number of obstacles : " << numObstaclesAdded << endl;
+#endif
 
     // The Bullet collision detector uses primitives instead of meshes, which makes
     // it faster and more useful for this simple application.
@@ -491,10 +497,10 @@ int main(int argc, char const *argv[])
 #endif
 
     vector<Vector3d> targets{
-        {-50_cm, 0,  50_cm},
-        { 50_cm, 0,  50_cm},
-        {-50_cm, 0, -50_cm},
-        { 50_cm, 0, -50_cm},
+        {-200_cm, 0,  200_cm},
+        { 200_cm, 0,  200_cm},
+        {-200_cm, 0, -200_cm},
+        { 200_cm, 0, -200_cm},
     };
 
     size_t target_idx = 0;
@@ -575,7 +581,7 @@ int main(int argc, char const *argv[])
             //     min(1.0, max(0.0, w_angular)),
             //     min(1.0, max(0.0, w_linear)));
 
-            double w = 0.05;
+            double w = 0.1;
 
             const double max_w = wheel_radius - 1_cm;
             weg_extension = w * max_w;

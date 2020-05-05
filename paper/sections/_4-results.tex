@@ -61,7 +61,7 @@ This experiment serves as a convenient baseline with which the others can be com
 \begin{figure}[!ht]
     \centering
 
-    \includegraphics[width=\columnwidth]{figures/4-results/fitness-without.png}
+    \includegraphics[width=\columnwidth]{figures/4-results/fitness-without.pdf}
 
     %\vspace{-0.1in}
 
@@ -89,7 +89,7 @@ Although these trajectories look similar, there is one key difference: the ANN a
 \begin{figure}[!ht]
     \centering
 
-    \includegraphics[width=\columnwidth]{figures/4-results/0-1-best_trajectories.png}
+    \includegraphics[width=\columnwidth]{figures/4-results/0-1-best_trajectories.pdf}
 
     %\vspace{-0.12in}
 
@@ -115,15 +115,15 @@ Effectively, the ANN can only turn left, however, this is not a problem for the 
 \begin{figure}[!ht]
     \centering
 
-    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/FSM-0-1-best_speed.png}}
+    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/FSM-0-1-best_speed-strut.pdf}}
 
     %\vspace{-0.08in}
 
-    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/ANN-0-1-best_speed.png}}
+    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/ANN-0-1-best_speed-strut.pdf}}
 
     %\vspace{-0.08in}
 
-    \caption{Left and right wheel speeds for the best evolved solutions for \emph{FSM-0-1} (a) and \emph{ANN-0-1} (b).}
+    \caption{Left and right wheel speeds and strut extension amounts for the best evolved solutions for \emph{FSM-0-1} (a) and \emph{ANN-0-1} (b). The left vertical axis shows values for wheel speeds (the solid red line and the dash-dot blue line), and the right vertical axis shows the scale for wheel strut extension amounts (the orange dashed line). }
     \label{fig:ANN-0-1-best-speed}
 
     %\vspace{-0.1in}
@@ -142,7 +142,7 @@ Specifically, \emph{WheelBase} and \emph{TrackWidth} should be 8.5~\si{cm} and 1
 \begin{figure}[!ht]
     \centering
 
-    \includegraphics[width=\columnwidth]{figures/4-results/0-1-best_params.png}
+    \includegraphics[width=\columnwidth]{figures/4-results/0-1-best_params.pdf}
 
     %\vspace{-0.1in}
 
@@ -156,7 +156,7 @@ Specifically, \emph{WheelBase} and \emph{TrackWidth} should be 8.5~\si{cm} and 1
 
 Finally, \figref{fig:FSM-best-params} plots the distributions for all evolved FSM parameters.
 %
-It is worth noting that in the absence of obstacles, neither the evolved FSMs or ANNs extend the struts.
+It is worth noting that in the absence of obstacles, neither the evolved FSMs or ANNs extend the struts by a significant amount.
 %
 This result is not unexpected as any extension would result in a reduced speed (due to the scaling mentioned previously), and the struts are not needed when obstacles are not present.
 %
@@ -172,9 +172,9 @@ Specifically, the threshold values and speeds evolved for the \emph{Left} and \e
     % \hfil
     % \subfloat[]{\includegraphics[width=\textwidth]{figures/4-results/FSM-40-2-best_params.png}}
 
-    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/fsm01-strut-forward.png}}
+    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/FSM-0-1-strut-forward.pdf}}
 
-    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/fsm01-left-right.png}}
+    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/FSM-0-1-left-right.pdf}}
 
 
 
@@ -212,7 +212,7 @@ Videos (and interactive animations) for high fitness individuals can be found he
 \begin{figure}[!ht]
     \centering
 
-    \includegraphics[width=\columnwidth]{figures/4-results/fitness-with.png}
+    \includegraphics[width=\columnwidth]{figures/4-results/fitness-with.pdf}
 
     \caption{Plots for the maximum fitness found in the two experiments including obstacles. Shaded regions indicate confidence intervals of one standard deviation from the mean for the 20 replicates of each experiment. The maximum possible fitness is 10, and fitness values above 2 indicate that Adabot was able to reach at least one way-point.}
     \label{fig:fitness-vs-iteration-obst}
@@ -240,7 +240,7 @@ The first and second principles match results that we have seen on the physical 
 \begin{figure}[!ht]
     \centering
 
-    \includegraphics[width=\columnwidth]{figures/4-results/40-2-best_params.png}
+    \includegraphics[width=\columnwidth]{figures/4-results/40-2-best_params.pdf}
 
     %\vspace{-0.07in}
 
@@ -259,8 +259,14 @@ While the physical characteristics are similar between the two sets of experimen
 %
 Note that since environments are randomly generated, even though the evolved ANN does not reach all four way-points for this test, it does not mean that it did not do so during fitness evaluation.
 %
-The most important feature of the plots in \figref{fig:40-2-best-speed} are that the evolved controllers are operating at reduced speeds.
+The two most striking features of the plots in \figref{fig:40-2-best-speed} are that the evolved controllers ANNs are operating at reduced speeds and that with the addition of obstacles to the simulation the wheels struts are being extended for both controllers.
 %
+For the evolved FSM, the wheel struts are extended when the first obstacle is reached, and they remain roughly halfway extended for the duration of the evaluation.
+%
+The ANN controller uses a slightly different strategy. The wheel struts are fully extended at the beginning of the simulation and remain so throughout, which means that the top speed of the UGV must be reduced for safety (see section~\ref{sec:adabot}).
+
+
+
 % Examining the evolved values in \figref{fig:FSM-best-params} shows that for at least the \emph{FSM-40-2}, the evolved speeds are still near the maximum allowed value.
 %
 Examining the evolved FSM values, we see that nearly identical values are discovered for all parameters except $b_{\mathit{ext}}$
@@ -282,15 +288,15 @@ Thus, these behaviors are slower because the struts are required to climb obstac
 \begin{figure}[!ht]
     \centering
 
-    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/FSM-40-2-best_speed.png}}
+    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/FSM-40-2-best_speed-strut.pdf}}
 
     %\vspace{-0.08in}
 
-    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/ANN-40-2-best_speed.png}}
+    \subfloat[]{\includegraphics[width=\columnwidth]{figures/4-results/ANN-40-2-best_speed-strut.pdf}}
 
     %\vspace{-0.08in}
 
-    \caption{Left and right wheel speeds for the best evolved FSM (a) and ANN (b) in a randomly generated environment that includes obstacles.}
+    \caption{Left and right wheel speeds and strut extensions for the best evolved FSM (a) and ANN (b) in a randomly generated environment that includes obstacles. Similar to Figure~\ref{fig:ANN-0-1-best-speed}, the left and right vertical axes show scales for wheel speeds and strut extension amounts, respectively.}
     \label{fig:40-2-best-speed}
 
     %\vspace{-0.2in}
@@ -334,7 +340,7 @@ We have identified two sources of error with the simple model: (1) it does not t
 
     %\vspace{-0.05in}
 
-    \includegraphics[width=\columnwidth]{figures/4-results/ann_map.png}
+    \includegraphics[width=\columnwidth]{figures/4-results/ann_map.pdf}
 
     %\vspace{-0.1in}
 
@@ -346,7 +352,7 @@ We have identified two sources of error with the simple model: (1) it does not t
 \end{figure}
 
 
-For our final comparison between these two control models, we took five best performing individuals from each replicate experiment and evaluated them on three new environments. The new environments required the mobile robot to drive four times further and handle twice as many obstacles. The simulation time was also increase from 30 s to 90 s.
+For our final comparison between these two control models, we took five best performing individuals from each replicate experiment and evaluated them on three new environments. The new environments required the mobile robot to drive four times further and handle twice as many obstacles. The simulation time was also increased from 30 s to 90 s.
 %
 Results from these evaluations are shown in Figure~\ref{fig:evaluation}.
 %
@@ -356,7 +362,7 @@ As shown in the figure, the FSM controllers were still on average able to reach 
 \begin{figure}[!ht]
     \centering
 
-    \includegraphics[width=\columnwidth]{figures/4-results/evaluation.png}
+    \includegraphics[width=\columnwidth]{figures/4-results/evaluation.pdf}
 
     \caption{The best evolved controllers from each replicate were evaluated in new environments. FSM controllers were still able to reach some way-points, but most ANN controllers failed to reach even one.}
     \label{fig:evaluation}
@@ -371,11 +377,11 @@ In summary, regarding the optimization of the Adabot system we found that:
 
 \item Similar physical characteristics are optimal with and without obstacles in the environment.
 
-\item The speed of the left and right wheels should have a linear relationship with $\alpha_{\mathit{target}}$ (rather than a discrete relationship as is the case with the current FSM).
+\item The speed of the left and right wheels should have a linear relationship with $\alpha_{\mathit{target}}$ (rather than a discrete relationship as is the case with the current FSM). This will enable the robot to \emph{veer} towards the target.
 
-\item The task can be solved by controlling only a single wheel, though, this is likely not a desirable trait. In future work, we plan to add an evolutionary pressure so that the evolved ANNs turn in both directions.
+\item The task can be solved by controlling only a single side of wheels, though, this is likely not a desirable trait. In future work, we plan to add an evolutionary pressure so that the evolved ANNs turn in both directions, for example, by creating environments and way-points that require both left and right turns.
 
-\item Controlling the strut will require a more complex model of the robots dynamics. Once the struts are extended, it is difficult to discern when they should be retracted.
+\item Controlling the strut will require a more complex model of the robots dynamics. Once the struts are extended, it is difficult to discern when they should be retracted. In our future work, we will investigate vision-based methods and parameter identification for measuring and detecting poor mobility.
 
 \end{enumerate}
 

@@ -5,15 +5,33 @@ UGVs are becoming more prevalent. Likewise, their envisioned environments are be
 %
 We have evolved a UGV so that it is better able to handle obstacles of varying sizes.
 %
-Specifically, we compared and analyzed FSM and ANN controllers with and without obstacles in the environment.
+Specifically, we compared and analyzed FSM and ANN controllers with and without obstacles in the environment while simultaneously evolving the physical characteristics of our UGV.
 %
 In comparing these two techniques we were able to find design principles that incorporate the advantages of both.
 %
+Specifically, we found that a mixture of the two strategies seems able to maintain the strengths of both approaches.
+%
+For example, an advantage of the FSM designed for this study is that it turns in both directions, but there was insufficient evolutionary pressure for this behavior to evolve in the ANNs. On the other hand, ANNs evolved a more continuous nature to their turning. Instead of turning in place, they tend to \emph{veer} towards the target.
+%
+Our final, hand-designed controller incorporates both of these strategies, but it may not have been obvious to design such a controller without first evolving the FSMs and ANNs.
+
+
 Although a direction controller is straightforward to optimize, the complex dynamics associated with climbing over obstacles makes it more difficult to design a controller for extending the Adabot' struts.
 %
-Our future work will focus on optimizing the hybrid controller and investigating different techniques for extending the struts.
+Specifically, the differential drive model used to predict the robot linear and angular speed does not take into account obstacles, wheel slipping, or the extension of wheel struts.
+%
+Our future work will focus both on optimizing the hybrid controller and investigating different strategies for extending and retracting the struts so that the robot is able to more effectively gain the benefits of both wheeled and legged-wheel locomotion.
+
+One possibility for improving control is to use a recurrent neural network (RNN) for control.
+%
+Doing so may provide a means by which the robot can sense that it has transitions from one type of terrain to another.
+%
+Evolving an RNN, however, will require a more careful selection of evolutionary pressures, and it may require a more gradual increase in task difficulty.
+%
+A technique such as Lexicase selection~\citep{Moore.2018.2CAL.TiebreaksDiversityIsolating} could be used to evolve RNNs that work well in many types of terrain.
 
 
 % Talk about more complex neural networks (recurrent, hidden nodes, etc.).
 
 % More complex tasks (sequential tasks lexicase).
+

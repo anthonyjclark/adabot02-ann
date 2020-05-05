@@ -32,10 +32,13 @@ tracks,
 legs~\citep{Haldane.ICRA.VelociRoACH.2013},
 legged-wheels (wheels are rimless, wheel spokes make contact with the ground)~\citep{Saranli.IntJrnRoboRes.RHex.2001,Quinn.IROS.Whegs.2002,Eich.SSRR.Stair-climb-SAR.2008,Kenneally.IEEERobAutLetters.Legged-robots.2016},
 wheeled-legs (wheels are on the end of legs and the suspension is potentially actively actuated)~\citep{Grand.2004.IJRR.StabilityTractionOptimization,Zheng.2015.AME.DesignAnalysisWheellegged,Smith.IROS.Tri-wheel.2015}, and
-transformable wheels~\citep{Kim.2014.ITR.WheelTransformerWheelLeg,Chen.2014.ITM.QuattropedLegWheel,Chen.2017.ITR.TurboQuadNovelLega,Wei.2017.JMR.DesignImplementationLeg}.
+transformable wheels~\citep{Kim.2014.ITR.WheelTransformerWheelLeg,Chen.2014.ITM.QuattropedLegWheel,Chen.2017.ITR.TurboQuadNovelLeg,Wei.2017.JMR.DesignImplementationLeg}.
 %
 Although these systems provide an advantage over traditional wheeled robots, optimization is not performed in the vast majority of these studies.
 %
+Moreover, as identified by \citet{Mintchev.2016.IRAM.AdaptiveMorphologyDesign}, most researchers in the area of transformable wheels currently focus on the mechanical design and leave control and decision making to future work.
+%
+For example, most robots with transformable wheels are controlled remotely~\citep{She.IROS.Transformable-wheel.2015,Chen.2017.ITR.TurboQuadNovelLeg}, and \citet{Kim.2014.ITR.WheelTransformerWheelLeg} designed a passive triggering mechanism that does not require any controller input.
 % \blue{How could EA help?}
 
 
@@ -89,12 +92,12 @@ Source code has been made available on GitHub\footnote{\url{https://github.com/a
     % \hfil
     % \subfloat[]{\fbox{\crule[white]{0.4\columnwidth}{2cm}}}
 
-    \subfloat[3D Printed Prototype]{%
-        \includegraphics[width=0.4\textwidth,valign=c]{figures/1-introduction/perspective-image.jpg}%
-    }\quad
     \subfloat[Simulated Device]{%
         \includegraphics[width=0.4\textwidth,valign=c]{figures/1-introduction/simulation-climbing.png}%
         \vphantom{\includegraphics[width=0.4\textwidth,valign=c]{figures/1-introduction/perspective-image.jpg}}%
+    }\quad
+    \subfloat[3D Printed Prototype]{%
+        \includegraphics[width=0.4\textwidth,valign=c]{figures/1-introduction/perspective-image.jpg}%
     }
 
     %\vspace{-0.05in}

@@ -81,7 +81,7 @@ see our preliminary study~\citep{Clark.2017.SSCI.Adabot}.
 
     % \vspace{-0.08in}
 
-    \includegraphics[width=0.8\columnwidth]{figures/3-adabot/extension-mechanism.png}
+    \includegraphics[width=0.8\columnwidth]{figures/3-adabot/extension-mechanism.pdf}
 
     % \vspace{-0.15in}
 
@@ -127,7 +127,7 @@ and is comparable in speed (if not faster) than common alternatives~\citep{Moure
 \begin{figure}[!ht]
     \centering
 
-    \includegraphics[width=0.8\columnwidth]{figures/3-adabot/environment.png}
+    \fbox{\includegraphics[width=0.8\columnwidth]{figures/3-adabot/environment.png}}
     % \fbox{\crule[white]{\columnwidth}{2cm}}
 
     % \vspace{-0.12in}
@@ -148,6 +148,11 @@ and is comparable in speed (if not faster) than common alternatives~\citep{Moure
 %
 Adabot is a skid-steer style robot--it turns by rotating its left and right wheels at different rates. Although each wheel and wheel strut set can be controlled independently, in this study we only have three control outputs: (1) an angular rate for the left wheels, (2) an angular rate for the right wheels, and (3) a single extension amount for all four sets of struts.
 %
+Although it may be beneficial to control each wheel independently, for this study we have chosen synchronize both left wheels and both right wheels.
+%
+This reduces the number of evolved control parameters and enables us to use  a differential drive model for predicting the robots dynamics. In the future, we will explore the effects of controlling each wheel independently.
+
+
 For Adabot to aid during a search and rescue operation, it must be able to successfully \emph{cover} (completely search) its designated area.
 %
 A simplified version of this task, called \emph{way-point navigation}, is considered during evolutionary optimization.
@@ -180,19 +185,19 @@ Threshold angles are shown in \figref{fig:fsm}(c).
     % \includegraphics[width=0.6\columnwidth]{figures/4-simulation/state-machine.png}
     % \subfloat[]{\fbox{\crule[white]{0.4\columnwidth}{2cm}}}
     \subfloat[Direction Control]{%
-        \includegraphics[width=0.45\textwidth,valign=c]{figures/3-adabot/FSM-direction.png}%
+        \includegraphics[width=0.45\textwidth,valign=c]{figures/3-adabot/FSM-direction.pdf}%
         % \vphantom{\includegraphics[width=0.3\textwidth,valign=c]{figures/3-adabot/scene.png}}%
     }
     \hfil
     \subfloat[Extension Control]{%
-        \includegraphics[width=0.45\textwidth,valign=c]{figures/3-adabot/FSM-strut.png}%
+        \includegraphics[width=0.45\textwidth,valign=c]{figures/3-adabot/FSM-strut.pdf}%
         % \vphantom{\includegraphics[width=0.3\textwidth,valign=c]{figures/3-adabot/scene.png}}%
     }
 
     % \hfil
 
     \subfloat[Environment Diagram]{%
-        \includegraphics[width=0.65\textwidth,valign=c]{figures/3-adabot/scene.png}%
+        \includegraphics[width=0.65\textwidth,valign=c]{figures/3-adabot/scene.pdf}%
         % \vphantom{\includegraphics[width=0.3\textwidth,valign=c]{figures/3-adabot/scene.png}}%
     }
 
@@ -206,7 +211,7 @@ Threshold angles are shown in \figref{fig:fsm}(c).
 \end{figure*}
 
 
-To determine when, and by how much, wheel struts should be extended, we use a simple model based on the UGV's current error. Specifically, we calculate an expected linear ($v$) and angular ($\omega$) velocity (based on the wheel rates) using the following model:
+To determine when, and by how much, wheel struts should be extended, we use a simple differential drive model based and compare expected speeds with measured speeds. Specifically, we calculate an expected linear ($v$) and angular ($\omega$) velocity (based on the wheel rates) using the following model:
 
 % The second action, handling the wheel struts, is accounted for by the state shown in the lower part of \figref{fig:fsm}(a).
 %
@@ -228,11 +233,13 @@ respectively, and $\mathit{TrackWidth}$ represents the distance between wheels o
 %
 % It compares the expected speed to the actual speeds of the device, which are known exactly in simulation and can be measured accurately using an overhead camera setup in physical experiments, to calculate the scaled (between 0 and 1) absolute error values $v_e$ and $\omega_e$.
 %
-These calculated values (expected based on the differential drive model) are then subtracted from the actual linear and angular velocities values.
+These calculated values (expected based on the differential drive model) are then subtracted from the actual (\textbf{measured}) linear and angular velocities values.
 %
-The difference value (the error between expected and actual velocities) are then scaled between 0 and 1 to produce $v_e$ and $\omega_e$, which are the scaled linear and angular velocities, respectively.
+The actual speed of the simulated robot is provided by the simulator, and in a real-world environment it can be measured using an overhead camera system.
 %
-Error values are scaled between 0 and 1 and then filtered using exponential smoothing. Finally, they are used in the following equations to calculate the extension amount of all struts:
+The difference values (the error between expected and actual velocities) are then scaled between 0 and 1 to produce $v_e$ and $\omega_e$, which are the scaled linear and angular velocities, respectively.
+%
+These two error values are then filtered using exponential smoothing. Finally, they are used in the following equations to calculate the extension amount of all struts:
 
 % \vspace{-0.2in}
 
@@ -250,7 +257,7 @@ The final extension amount ($\mathit{ext}$) is based on the maximum of these two
 %
 In essence, the struts will be extended by an amount that is linearly proportional to the current error in speed (maximum between linear and angular error).
 %
-Thus, when Adabot encounters an obstacle that blocks it from moving according to the differential drive model, it will extend the struts in an effort to climb over any obstacles.
+Thus, when Adabot encounters an obstacle that reduces its mobility  (compared to that predicted by the differential drive model), it will extend the struts in an effort to climb over the obstacles.
 
 
 \begin{table}[thb]
